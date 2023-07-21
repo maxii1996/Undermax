@@ -280,6 +280,7 @@
             this.refresh();
             this._textWindows.forEach(textWindow => textWindow.refresh()); // Update the text windows
         }
+        
 
         setRange(minValue, maxValue) {
             this._minValue = minValue;
