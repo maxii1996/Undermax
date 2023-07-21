@@ -242,7 +242,6 @@
     
     
     
-    
 
     class SliderWindow extends Window_Base {
         constructor(x, y, width, height, backgroundColor, circleColor, hoverColor, circleSize, textWindows, variableId) {
@@ -255,7 +254,7 @@
                 backgroundColor = JSON.parse(backgroundColor);
             } catch (e) {
             }
-            
+    
             this._backgroundColor = (Array.isArray(backgroundColor) && backgroundColor.length) ? backgroundColor : ['#00000080', '#FFFFFF80', '#00000080'];
             this._circleColor = circleColor;
             this._hoverColor = hoverColor; // New property for hover color
@@ -264,15 +263,13 @@
             this._variableId = variableId; // Reference to the game variable
             this.setBackgroundType('Transparent');
             this.deactivate(); // Deactivate the slider initially
-
         }
-
+    
         setValue(value) {
             this._value = Math.max(this._minValue, Math.min(this._maxValue, value));
             $gameVariables.setValue(this._variableId, this._value); // Update the game variable
             this.refresh();
             this._textWindows.forEach(textWindow => textWindow.refresh()); // Update the text windows
-
         }
 
         setRange(minValue, maxValue) {
