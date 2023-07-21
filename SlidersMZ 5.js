@@ -197,26 +197,20 @@
                 const stat = partyStatMatch[2];
                 this._text = this._text.replace(partyStatMatch[0], getPartyStat(index, stat));
             }
-            const conditionMatch = this._text.match(/\\cond(\w+)\[(\d+)\]/i);
+            const conditionMatch = this._text.match(/\\condSwitchIsOn\[(\d+)\]/i);
             if (conditionMatch) {
-                const condition = conditionMatch[1];
-                const x = Number(conditionMatch[2]);
-                console.log(`Condition: ${condition}`);
+                const x = Number(conditionMatch[1]);
+                console.log(`Condition: SwitchIsOn`);
                 console.log(`X: ${x}`);
-                let result;
-                switch (condition) {
-                    case 'SwitchIsOn':
-                        result = $gameSwitches.value(x);
-                        console.log(`Switch ${x} is ${result ? 'ON' : 'OFF'}`);
-                        break;
-                    // ...
-                }
+                const result = $gameSwitches.value(x);
+                console.log(`Switch ${x} is ${result ? 'ON' : 'OFF'}`);
                 this._text = result ? this._trueValue : this._falseValue;
                 console.log(`Final text: ${this._text}`);
             }
             this.drawTextEx(this._text, 0, 0);
         }
     }
+    
     
 
     class SliderWindow extends Window_Base {
