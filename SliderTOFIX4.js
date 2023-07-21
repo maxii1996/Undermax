@@ -190,11 +190,19 @@
     
         update() {
             super.update();
-            if (this._text !== this._lastText) {
+            const variableConditionMatch = this._text.match(/\\condVariable([<>]=?)\[(var\((\d+)\)|(\\d+)),(var\((\d+)\)|(\\d+))\]/i);
+            if (variableConditionMatch) {
+                const x = variableConditionMatch[3] ? $gameVariables.value(Number(variableConditionMatch[3])) : Number(variableConditionMatch[4]);
+                if (this._lastVariableValue !== x) {
+                    this.refresh();
+                    this._lastVariableValue = x;
+                }
+            } else if (this._text !== this._lastText) {
                 this.refresh();
                 this._lastText = this._text;
             }
         }
+        
     
         refresh() {
             this.contents.clear();
