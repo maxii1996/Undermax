@@ -190,7 +190,10 @@
     
         update() {
             super.update();
-            this.refresh();
+            if (this._text !== this._lastText) {
+                this.refresh();
+                this._lastText = this._text;
+            }
         }
     
         refresh() {
@@ -244,6 +247,7 @@
             this.drawTextEx(this._text, 0, 0);
         }
     }
+    
     
     
     
