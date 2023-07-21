@@ -188,6 +188,11 @@
             this.refresh();
         }
     
+        update() {
+            super.update();
+            this.refresh();
+        }
+    
         refresh() {
             this.contents.clear();
             this.changeTextColor(this._fontColor);
