@@ -1,10 +1,165 @@
 /*:
  * @target MZ
- * @plugindesc v1.0.0 Sliders Scene with customizable options for Rpg Maker MZ!
+ * @plugindesc v1.1.0 Sliders Scene with customizable options for Rpg Maker MZ!
  * @author Maxii1996 | Undermax Games
  * @url https://undermax.itch.io/
  * @help 
  *  
+ * 
+ *  ///////////////////////////////////////////////////
+ * 
+ *    ____  _ _     _                 __  __ _____
+ *   / ___|| (_) __| | ___ _ __ ___  |  \/  |__  /
+ *   \___ \| | |/ _` |/ _ \ '__/ __| | |\/| | / / 
+ *    ___) | | | (_| |  __/ |  \__ \ | |  | |/ /_ 
+ *   |____/|_|_|\__,_|\___|_|  |___/ |_|  |_/____|
+ * 
+ *                                                                          
+ *  ///////////////// VER. 1.1 //////////////////////
+ * 
+ * This plugin is designed to create customizable sliders for RPG Maker MZ. 
+ * These sliders can be used to control game variables, allowing for a wide 
+ * range of interactive and dynamic gameplay elements.
+ * 
+ * The sliders can be customized in terms of their appearance, including 
+ * their background color and the color of the slider itself. 
+ * You can also specify the position of the slider on the screen.
+ * 
+ * Each slider is associated with a game variable, and the value of the 
+ * slider controls the value of the variable. This means that you can use 
+ * sliders to control a wide range of game mechanics.
+ * 
+ * In addition to sliders, this plugin also supports the creation of 
+ * custom texts. These texts can be used to provide context or instructions 
+ * for the sliders. You can specify the position of the text on the screen, as
+ * well as the game variable that the text is associated with.
+ * 
+ * Here are the commands you can use with this plugin:
+ * 
+ * - Create New Sliders: This command creates new sliders with the given 
+ * parameters. 
+ * The parameters include the background color, background image, and 
+ * the settings for the sliders and custom texts.
+ * 
+ * - Background Color 1: This argument sets the first color of the gradient 
+ * for the background of the scene (if an image is not selected). 
+ * You should use HEX colors for this argument.
+ * 
+ * - Background Color 2: This argument sets the second color of 
+ * the gradient for the background of the scene (if an image is not selected). 
+ * You should use HEX colors for this argument.
+ * 
+ * - Background Image: This argument sets the background image of the slider.
+ * If no image is selected, the background will be generated with the background 
+ * gradients
+ * 
+ * =======================================
+ * 
+ * IMPORTANT INFORMATION:
+ *
+ * The plugin supports HEX colors with transparency.
+ *
+ * This means that if you want to lower the opacity of a color add the opacity number 
+ * (BETWEEN 00 and 99) to the end of the HEX number of the color you use.
+ *
+ * Example: Black with 50% opacity:
+ *
+ * #00000050 (#000000 is black and 50 corresponds to opacity)
+ * 
+ * 
+ * ========================================
+ * 
+ * - Sliders: This argument sets the settings for the sliders.
+ * 
+ * - Custom Texts: This argument sets the settings for the custom texts.
+ * 
+ * In addition to sliders, this plugin also supports the creation of custom 
+ * texts. These texts can be used to provide context or instructions for the 
+ * sliders. You can specify the position of the text on the screen, as well as 
+ * the game variable that the text is associated with.
+ * 
+ * The custom texts also support a special command: \partyX[stat].
+ * 
+ * This command allows you to display the statistics of a specific party member. 
+ * X is the index of the party member (e.g., 1 for the first member, 2 for the 
+ * second member, etc.), and stat is the statistic you want to display 
+ * (e.g., level, mhp, mmp, atk, def, mat, mdf, agi, luk, hp, mp, name, class, 
+ * nextLevelExp). 
+ * 
+ * For example, \party1[level] would display the level of the first party 
+ * member, and \party3[hp] would display the current hp of the third party 
+ * member.
+ * 
+ * >> You can also use message commands, such as \c[x] \fs[x] or \i[x] 
+ * to change the font size and color or display icons.
+ * 
+ * ====================
+ * [v1.1] NEW FORMULAS FOR CUSTOM TEXT:
+ * 
+ * If you Custom Text is exactly these formulas:
+ * ====================
+ * 
+ * 
+ * 
+ * \condSwitchIsOn[X] 
+ * 
+ * This command checks the status of a specific game switch. 
+ * The X in the command should be replaced with the ID of the switch you want 
+ * to check. If the switch is turned on, the command will return true; if the 
+ * switch is off, the command will return false.
+ * 
+ * 
+ *
+ * \condVariable>[x,y] 
+ * 
+ * This command compares a game variable to a specific 
+ * value or another game variable. The x in the command should be replaced 
+ * with the ID of the variable you want to check, and the y should be replaced 
+ * with the value  or variable ID you want to compare it to. 
+ * 
+ * If the value of variable x is greater than y, the command will return true;
+ * otherwise, it will return false.
+ * 
+ * 
+ *
+ * \condVariable>=[x,y] 
+ * 
+ * This command works similarly to the previous one, 
+ * but it also returns  true if the value of variable x is equal to y.
+ *
+ * 
+ * \condVariable<=[x,y] 
+ * 
+ * This command checks if the value of variable x is 
+ * less than or equal to y. If it is, the command will return true; otherwise, 
+ * it will return false.
+ * 
+ * 
+ *
+ * \condVariable<[x,y] 
+ * 
+ *  This command checks if the value of variable x is less 
+ * than y. If it is, the command will return true; otherwise, it will return false.
+ * 
+ * 
+ *
+ * \condVariable<>[x,y] 
+ * 
+ * This command checks if the value of variable x is different 
+ * from y. If it is, the command will return true; otherwise, it will return false.
+ * 
+ * 
+ *
+ * In all of these commands, you can use var(x) to refer to the value of a game variable. 
+ * 
+ * For example, \condVariable>[var(1),5] will check if the value of game variable 1 
+ * is greater than 5.
+ * 
+ * 
+ * 
+ * 
+ * //// END OF DOCUMENTATION /////
+ * 
  * 
  * @command Create New Sliders
  * @text Create New Sliders
