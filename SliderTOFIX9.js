@@ -189,48 +189,43 @@
         }
     
        
-    update() {
-        super.update();
-        const variableConditionMatch = this._text.match(/\\condVariable([<>]=?)\[(var\((\d+)\)|(\\d+)),(var\((\d+)\)|(\\d+))\]/i);
-        if (variableConditionMatch) {
-            const x = variableConditionMatch[3] ? $gameVariables.value(Number(variableConditionMatch[3])) : Number(variableConditionMatch[4]);
-            if (this._lastVariableValue !== x) {
+        update() {
+            super.update();
+            const variableConditionMatch = this._text.match(/\\condVariable([<>]=?)\[(var\((\d+)\)|(\\d+)),(var\((\d+)\)|(\\d+))\]/i);
+            if (variableConditionMatch) {
+                const x = variableConditionMatch[3] ? $gameVariables.value(Number(variableConditionMatch[3])) : Number(variableConditionMatch[4]);
+                if (this._lastVariableValue !== x) {
+                    this.refresh();
+                    this._lastVariableValue = x;
+                }
+            } else if (this._text !== this._lastText) {
                 this.refresh();
-                this._lastVariableValue = x;
+                this._lastText = this._text;
             }
-        } else if (this._text !== this._lastText) {
-            this.refresh();
-            this._lastText = this._text;
         }
-    }
 
     
         refresh() {
             this.contents.clear();
             this.changeTextColor(this._fontColor);
-            const partyStatMatch = this._text.match(/\\party(\d+)\[(\w+)\]/i);
+            let finalText = this._text; // Variable local para almacenar el texto que se va a dibujar
+            const partyStatMatch = finalText.match(/\\party(\d+)\[(\w+)\]/i);
             if (partyStatMatch) {
                 const index = Number(partyStatMatch[1]);
                 const stat = partyStatMatch[2];
-                this._text = this._text.replace(partyStatMatch[0], getPartyStat(index, stat));
+                finalText = finalText.replace(partyStatMatch[0], getPartyStat(index, stat));
             }
-            const conditionMatch = this._text.match(/\\condSwitchIsOn\[(\d+)\]/i);
+            const conditionMatch = finalText.match(/\\condSwitchIsOn\[(\d+)\]/i);
             if (conditionMatch) {
                 const x = Number(conditionMatch[1]);
-                console.log(`Condition: SwitchIsOn`);
-                console.log(`X: ${x}`);
                 const result = $gameSwitches.value(x);
-                console.log(`Switch ${x} is ${result ? 'ON' : 'OFF'}`);
-                this._text = result ? this._trueValue : this._falseValue;
-                console.log(`Final text: ${this._text}`);
+                finalText = result ? this._trueValue : this._falseValue;
             }
-            const variableConditionMatch = this._text.match(/\\condVariable([<>]=?)\[(var\((\d+)\)|(\d+)),(var\((\d+)\)|(\d+))\]/i);
+            const variableConditionMatch = finalText.match(/\\condVariable([<>]=?)\[(var\((\d+)\)|(\d+)),(var\((\d+)\)|(\d+))\]/i);
             if (variableConditionMatch) {
                 const operator = variableConditionMatch[1];
                 const x = variableConditionMatch[3] ? $gameVariables.value(Number(variableConditionMatch[3])) : Number(variableConditionMatch[4]);
                 const y = variableConditionMatch[6] ? $gameVariables.value(Number(variableConditionMatch[6])) : Number(variableConditionMatch[7]);
-                console.log(`Condition: Variable${operator}`);
-                console.log(`X: ${x}, Y: ${y}`);
                 let result;
                 switch (operator) {
                     case '>':
@@ -249,12 +244,15 @@
                         result = x !== y;
                         break;
                 }
-                console.log(`Result: ${result}`);
-                this._text = result ? this._trueValue : this._falseValue;
-                console.log(`Final text: ${this._text}`);
+                finalText = result ? this._trueValue : this._falseValue;
             }
-            this.drawTextEx(this._text, 0, 0);
+            this.drawTextEx(finalText, 0, 0); // Dibuja finalText en lugar de this._text
         }
+        
+
+
+
+
     }
     
     
