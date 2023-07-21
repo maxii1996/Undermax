@@ -451,6 +451,7 @@
 
         update() {
             Scene_Base.prototype.update.call(this);
+            this._textWindows.forEach(textWindow => textWindow.update());
             if (this._sliderWindows.length > 0) {
                 if (Input.isTriggered('up')) {
                     this._sliderWindows[this._sliderIndex].deactivate();
@@ -476,6 +477,7 @@
                 }
             }
         }
+        
     
     }
 
