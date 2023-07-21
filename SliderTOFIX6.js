@@ -289,6 +289,7 @@
             this._textWindows.forEach(textWindow => textWindow.refresh()); // Update the text windows
         }
         
+        
 
         setRange(minValue, maxValue) {
             this._minValue = minValue;
@@ -342,6 +343,7 @@
                     SceneManager.pop(); // Close the scene when the cancel button is pressed
                 }
             }
+            this._textWindows.forEach(textWindow => textWindow.update());
         }
 
         changeValue(amount) {
@@ -450,6 +452,7 @@
         }
 
         update() {
+            
             Scene_Base.prototype.update.call(this);
             this._textWindows.forEach(textWindow => textWindow.update());
             if (this._sliderWindows.length > 0) {
