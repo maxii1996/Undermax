@@ -207,9 +207,39 @@
                 this._text = result ? this._trueValue : this._falseValue;
                 console.log(`Final text: ${this._text}`);
             }
+            const variableConditionMatch = this._text.match(/\\condVariable([<>]=?)\[(var\((\d+)\)|(\d+)),(var\((\d+)\)|(\d+))\]/i);
+            if (variableConditionMatch) {
+                const operator = variableConditionMatch[1];
+                const x = variableConditionMatch[3] ? $gameVariables.value(Number(variableConditionMatch[3])) : Number(variableConditionMatch[4]);
+                const y = variableConditionMatch[6] ? $gameVariables.value(Number(variableConditionMatch[6])) : Number(variableConditionMatch[7]);
+                console.log(`Condition: Variable${operator}`);
+                console.log(`X: ${x}, Y: ${y}`);
+                let result;
+                switch (operator) {
+                    case '>':
+                        result = x > y;
+                        break;
+                    case '>=':
+                        result = x >= y;
+                        break;
+                    case '<=':
+                        result = x <= y;
+                        break;
+                    case '<':
+                        result = x < y;
+                        break;
+                    case '<>':
+                        result = x !== y;
+                        break;
+                }
+                console.log(`Result: ${result}`);
+                this._text = result ? this._trueValue : this._falseValue;
+                console.log(`Final text: ${this._text}`);
+            }
             this.drawTextEx(this._text, 0, 0);
         }
     }
+    
     
     
     
