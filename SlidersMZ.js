@@ -93,7 +93,7 @@
 /*~struct~CustomText:
  * @param Text
  * @type text
- * @desc The custom text to display. Use \v[x] to display the value of variable x.
+ * @desc The custom text to display. Use \\v[x] to display the value of variable x.
  * 
  * @param Position X
  * @type number
@@ -106,7 +106,16 @@
  * @param Hide Active Switch ID
  * @type switch
  * @desc The ID of the switch that hides the custom text when active. Optional feature.
+ * 
+ * @param Value for True condition
+ * @type text
+ * @desc The value to display if the condition is true.
+ * 
+ * @param Value for False condition
+ * @type text
+ * @desc The value to display if the condition is false.
  */
+
 
 
 (() => {
@@ -178,17 +187,45 @@
         }
 
         refresh() {
-            this.contents.clear();
-            this.changeTextColor(this._fontColor);
-            const partyStatMatch = this._text.match(/\\party(\d+)\[(\w+)\]/i);
-            if (partyStatMatch) {
-                const index = Number(partyStatMatch[1]);
-                const stat = partyStatMatch[2];
-                this._text = this._text.replace(partyStatMatch[0], getPartyStat(index, stat));
-            }
-            this.drawTextEx(this._text, 0, 0);
+        this.contents.clear();
+        this.changeTextColor(this._fontColor);
+        const partyStatMatch = this._text.match(/\\party(\d+)\[(\w+)\]/i);
+        if (partyStatMatch) {
+            const index = Number(partyStatMatch[1]);
+            const stat = partyStatMatch[2];
+            this._text = this._text.replace(partyStatMatch[0], getPartyStat(index, stat));
         }
+        const conditionMatch = this._text.match(/\\cond(\w+)\[(\d+),(\d+)\]/i);
+        if (conditionMatch) {
+            const condition = conditionMatch[1];
+            const x = Number(conditionMatch[2]);
+            const y = Number(conditionMatch[3]);
+            let result;
+            switch (condition) {
+                case 'SwitchIsOn':
+                    result = $gameSwitches.value(x);
+                    break;
+                case 'Variable>':
+                    result = $gameVariables.value(x) > y;
+                    break;
+                case 'Variable>=':
+                    result = $gameVariables.value(x) >= y;
+                    break;
+                case 'Variable<=':
+                    result = $gameVariables.value(x) <= y;
+                    break;
+                case 'Variable<':
+                    result = $gameVariables.value(x) < y;
+                    break;
+                case 'Variable<>':
+                    result = $gameVariables.value(x) !== y;
+                    break;
+            }
+            this._text = result ? this._trueValue : this._falseValue;
+        }
+        this.drawTextEx(this._text, 0, 0);
     }
+}
 
     class SliderWindow extends Window_Base {
         constructor(x, y, width, height, backgroundColor, circleColor, hoverColor, circleSize, textWindows, variableId) {
