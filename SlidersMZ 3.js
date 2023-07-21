@@ -186,46 +186,35 @@
             this.refresh();
         }
 
-        refresh() {
-        this.contents.clear();
-        this.changeTextColor(this._fontColor);
-        const partyStatMatch = this._text.match(/\\party(\d+)\[(\w+)\]/i);
-        if (partyStatMatch) {
-            const index = Number(partyStatMatch[1]);
-            const stat = partyStatMatch[2];
-            this._text = this._text.replace(partyStatMatch[0], getPartyStat(index, stat));
-        }
-        const conditionMatch = this._text.match(/\\cond(\w+)\[(\d+),(\d+)\]/i);
-        if (conditionMatch) {
-            const condition = conditionMatch[1];
-            const x = Number(conditionMatch[2]);
-            const y = Number(conditionMatch[3]);
-            let result;
-            switch (condition) {
-                case 'SwitchIsOn':
-                    result = $gameSwitches.value(x);
-                    break;
-                case 'Variable>':
-                    result = $gameVariables.value(x) > y;
-                    break;
-                case 'Variable>=':
-                    result = $gameVariables.value(x) >= y;
-                    break;
-                case 'Variable<=':
-                    result = $gameVariables.value(x) <= y;
-                    break;
-                case 'Variable<':
-                    result = $gameVariables.value(x) < y;
-                    break;
-                case 'Variable<>':
-                    result = $gameVariables.value(x) !== y;
-                    break;
+    refresh() {
+            this.contents.clear();
+            this.changeTextColor(this._fontColor);
+            const partyStatMatch = this._text.match(/\\party(\d+)\[(\w+)\]/i);
+            if (partyStatMatch) {
+                const index = Number(partyStatMatch[1]);
+                const stat = partyStatMatch[2];
+                this._text = this._text.replace(partyStatMatch[0], getPartyStat(index, stat));
             }
-            this._text = result ? this._trueValue : this._falseValue;
+            const conditionMatch = this._text.match(/\\cond(\w+)\[(\d+)\]/i);
+            if (conditionMatch) {
+                const condition = conditionMatch[1];
+                const x = Number(conditionMatch[2]);
+                console.log(`Condition: ${condition}`);
+                console.log(`X: ${x}`);
+                let result;
+                switch (condition) {
+                    case 'SwitchIsOn':
+                        result = $gameSwitches.value(x);
+                        console.log(`Switch ${x} is ${result ? 'ON' : 'OFF'}`);
+                        break;
+                    // ...
+                }
+                this._text = result ? this._trueValue : this._falseValue;
+                console.log(`Final text: ${this._text}`);
+            }
+            this.drawTextEx(this._text, 0, 0);
         }
-        this.drawTextEx(this._text, 0, 0);
     }
-}
 
     class SliderWindow extends Window_Base {
         constructor(x, y, width, height, backgroundColor, circleColor, hoverColor, circleSize, textWindows, variableId) {
