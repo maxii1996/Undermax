@@ -290,6 +290,7 @@
         }
         
         
+        
 
         setRange(minValue, maxValue) {
             this._minValue = minValue;
@@ -345,6 +346,7 @@
             }
             this._textWindows.forEach(textWindow => textWindow.update());
         }
+        
 
         changeValue(amount) {
             this.setValue(this._value + amount);
