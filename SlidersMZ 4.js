@@ -178,15 +178,17 @@
     
 
     class CustomTextWindow extends Window_Base {
-        constructor(x, y, text, fontColor) {
+        constructor(x, y, text, fontColor, trueValue, falseValue) {
             super(new Rectangle(x, y, Graphics.boxWidth, Graphics.boxHeight));
             this._text = text;
             this._fontColor = fontColor;
+            this._trueValue = trueValue || '';
+            this._falseValue = falseValue || '';
             this.setBackgroundType('Transparent');
             this.refresh();
         }
-
-    refresh() {
+    
+        refresh() {
             this.contents.clear();
             this.changeTextColor(this._fontColor);
             const partyStatMatch = this._text.match(/\\party(\d+)\[(\w+)\]/i);
@@ -215,6 +217,7 @@
             this.drawTextEx(this._text, 0, 0);
         }
     }
+    
 
     class SliderWindow extends Window_Base {
         constructor(x, y, width, height, backgroundColor, circleColor, hoverColor, circleSize, textWindows, variableId) {
