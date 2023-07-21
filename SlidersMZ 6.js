@@ -212,6 +212,7 @@
     }
     
     
+    
 
     class SliderWindow extends Window_Base {
         constructor(x, y, width, height, backgroundColor, circleColor, hoverColor, circleSize, textWindows, variableId) {
@@ -358,7 +359,17 @@
                 const customText = JSON.parse(customTexts[i]);
                 // Check if the custom text is defined and the switch is off
                 if (customText && customText.Text && !$gameSwitches.value(customText['Hide Active Switch ID'])) {
-                    const textWindow = new CustomTextWindow(customText['Position X'], customText['Position Y'], customText.Text, customText['Font Color']);
+                  
+                    const textWindow = new CustomTextWindow(
+                        customText['Position X'], 
+                        customText['Position Y'], 
+                        customText.Text, 
+                        customText['Font Color'], 
+                        customText['Value for True condition'], 
+                        customText['Value for False condition']
+                    );
+
+
                     this._textWindows.push(textWindow);
                     this.addWindow(textWindow);
                 }
