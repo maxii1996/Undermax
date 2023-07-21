@@ -188,21 +188,22 @@
             this.refresh();
         }
     
-        update() {
-            super.update();
-            const variableConditionMatch = this._text.match(/\\condVariable([<>]=?)\[(var\((\d+)\)|(\\d+)),(var\((\d+)\)|(\\d+))\]/i);
-            if (variableConditionMatch) {
-                const x = variableConditionMatch[3] ? $gameVariables.value(Number(variableConditionMatch[3])) : Number(variableConditionMatch[4]);
-                if (this._lastVariableValue !== x) {
-                    this.refresh();
-                    this._lastVariableValue = x;
-                }
-            } else if (this._text !== this._lastText) {
+       
+    update() {
+        super.update();
+        const variableConditionMatch = this._text.match(/\\condVariable([<>]=?)\[(var\((\d+)\)|(\\d+)),(var\((\d+)\)|(\\d+))\]/i);
+        if (variableConditionMatch) {
+            const x = variableConditionMatch[3] ? $gameVariables.value(Number(variableConditionMatch[3])) : Number(variableConditionMatch[4]);
+            if (this._lastVariableValue !== x) {
                 this.refresh();
-                this._lastText = this._text;
+                this._lastVariableValue = x;
             }
+        } else if (this._text !== this._lastText) {
+            this.refresh();
+            this._lastText = this._text;
         }
-        
+    }
+
     
         refresh() {
             this.contents.clear();
@@ -333,6 +334,7 @@
         update() {
             super.update();
             if (this.active) {
+                let oldValue = this._value;
                 if (Input.isRepeated('left')) {
                     this.changeValue(-1);
                 }
@@ -343,10 +345,15 @@
                     this.deactivate();
                     SceneManager.pop(); // Close the scene when the cancel button is pressed
                 }
+                // Si el valor ha cambiado, actualiza las ventanas de texto
+                if (this._value !== oldValue) {
+                    this._textWindows.forEach(textWindow => textWindow.refresh());
+                }
             }
             this._textWindows.forEach(textWindow => textWindow.update());
+            
+            
         }
-        
 
         changeValue(amount) {
             this.setValue(this._value + amount);
