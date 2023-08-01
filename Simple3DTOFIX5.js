@@ -38,6 +38,20 @@
  * @desc The blend mode of the image.
  * @default Normal
  *
+ * @arg blurEffect
+ * @type boolean
+ * @text Enable Blur Effect
+ * @desc Enable or disable the blur effect.
+ * @default false
+ *
+ * @arg blurIntensity
+ * @type number
+ * @min 0
+ * @max 100
+ * @text Blur Intensity
+ * @desc The intensity of the blur effect.
+ * @default 10
+ *
  * @arg tintColor
  * @type text
  * @text Tint Color
@@ -194,7 +208,6 @@
  *
  */
 
-
 var $3DImages = $3DImages || [];
 
 PluginManager.registerCommand('Simple3DImage', 'show3DImage', args => {
@@ -225,6 +238,14 @@ PluginManager.registerCommand('Simple3DImage', 'show3DImage', args => {
     const blendMode = String(args.blendMode);
     const enableTintFilter = args.enableTintFilter === "true";
     const tintColor = enableTintFilter && args.tintColor ? parseInt(args.tintColor.replace("#", "0x")) : null;
+    const blurEffect = args.blurEffect === "true";
+    const blurIntensity = Number(args.blurIntensity);
+
+    // Remove existing sprite with the same ID if it exists
+    if ($3DImages[imageId]) {
+        SceneManager._scene._spriteset.removeChild($3DImages[imageId]);
+        $3DImages[imageId] = null;
+    }
 
     const sprite = new Sprite();
     sprite.bitmap = ImageManager.loadPicture(imageName);
@@ -303,13 +324,26 @@ PluginManager.registerCommand('Simple3DImage', 'show3DImage', args => {
             shadowSprite.skew.x = sprite.skew.x;
             shadowSprite.skew.y = sprite.skew.y;
             shadowSprite.tint = shadowColor;
-            shadowSprite.alpha = 0.5;
             SceneManager._scene._spriteset.addChild(shadowSprite);
-            console.log("Shadow effect applied:", shadowColor);
+            console.log("Shadow effect applied:", shadowColor, shadowX, shadowY);
         }
 
-        sprite.opacity = opacity * 255 / 100; // Corrección aquí
+        // Apply tint filter
+        if (tintColor) {
+            sprite.tint = tintColor;
+            console.log("Tint filter applied:", tintColor);
+        }
 
+        // Apply blur effect if enabled
+        if (blurEffect) {
+            sprite.filters = [new PIXI.filters.BlurFilter(blurIntensity)];
+            console.log("Blur effect applied:", blurIntensity);
+        }
+
+        // Apply opacity
+        sprite.opacity = opacity * 2.55;
+
+        // Apply blend mode
         switch (blendMode) {
             case "Additive":
                 sprite.blendMode = PIXI.BLEND_MODES.ADD;
@@ -323,10 +357,6 @@ PluginManager.registerCommand('Simple3DImage', 'show3DImage', args => {
             default:
                 sprite.blendMode = PIXI.BLEND_MODES.NORMAL;
                 break;
-        }
-
-        if (tintColor) {
-            sprite.tint = tintColor;
         }
 
         $3DImages[imageId] = sprite;
