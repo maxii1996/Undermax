@@ -45,6 +45,49 @@
  * @text Tilt
  * @desc The tilt of the image to simulate perspective.
  *
+ * @arg mirrorX
+ * @type boolean
+ * @text Mirror X
+ * @desc Mirror the image horizontally.
+ * @default false
+ *
+ * @arg mirrorY
+ * @type boolean
+ * @text Mirror Y
+ * @desc Mirror the image vertically.
+ * @default false
+ *
+ * @arg smoothing
+ * @type boolean
+ * @text Smoothing
+ * @desc Apply smoothing to the image.
+ * @default true
+ *
+ * @arg glowColor
+ * @type color
+ * @text Glow Color
+ * @desc The color of the glow effect.
+ *
+ * @arg glowIntensity
+ * @type number
+ * @text Glow Intensity
+ * @desc The intensity of the glow effect.
+ *
+ * @arg shadowX
+ * @type number
+ * @text Shadow X
+ * @desc The X position of the shadow.
+ *
+ * @arg shadowY
+ * @type number
+ * @text Shadow Y
+ * @desc The Y position of the shadow.
+ *
+ * @arg shadowColor
+ * @type color
+ * @text Shadow Color
+ * @desc The color of the shadow.
+ *
  * @arg x
  * @type number
  * @text X Position
@@ -80,6 +123,14 @@ PluginManager.registerCommand('Simple3DImage', 'show3DImage', args => {
     const customWidth = Number(args.customWidth);
     const customHeight = Number(args.customHeight);
     const tilt = Number(args.tilt);
+    const mirrorX = args.mirrorX === "true";
+    const mirrorY = args.mirrorY === "true";
+    const smoothing = args.smoothing === "true";
+    const glowColor = String(args.glowColor);
+    const glowIntensity = Number(args.glowIntensity);
+    const shadowX = Number(args.shadowX);
+    const shadowY = Number(args.shadowY);
+    const shadowColor = String(args.shadowColor);
     const x = Number(args.x);
     const y = Number(args.y);
     const z = Number(args.z);
@@ -95,7 +146,39 @@ PluginManager.registerCommand('Simple3DImage', 'show3DImage', args => {
         sprite.scale.y = customHeight / sprite.height;
     }
 
-    sprite.setTransform(0, tilt, 0, 0, 0, 0);
+    // Apply a skew to simulate perspective
+    sprite.skew.x = tilt / 100;
+    sprite.skew.y = tilt / 100;
+
+    // Apply a scale to simulate depth
+    sprite.scale.x *= (1 - z / 1000);
+    sprite.scale.y *= (1 - z / 1000);
+
+    // Apply mirror effects
+    if (mirrorX) sprite.scale.x *= -1;
+    if (mirrorY) sprite.scale.y *= -1;
+
+    // Apply smoothing
+    sprite.bitmap.smooth = smoothing;
+
+    // Apply glow effect
+    if (glowColor) {
+        const filter = new PIXI.filters.GlowFilter({
+            color: glowColor,
+            outerStrength: glowIntensity
+        });
+        sprite.filters = [filter];
+    }
+
+    // Apply shadow effect
+    if (shadowColor) {
+        const shadow = new PIXI.filters.DropShadowFilter();
+        shadow.color = shadowColor;
+        shadow.alpha = 1;
+        shadow.distance = Math.sqrt(shadowX * shadowX + shadowY * shadowY);
+        shadow.angle = Math.atan2(shadowY, shadowX);
+        sprite.filters = sprite.filters ? sprite.filters.concat(shadow) : [shadow];
+    }
 
     $3DImages[imageId] = sprite;
 
