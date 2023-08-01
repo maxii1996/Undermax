@@ -96,6 +96,35 @@
  * @text Shadow Color
  * @desc The color of the shadow (e.g., #000000).
  *
+ * @arg borderColor
+ * @type text
+ * @text Border Color
+ * @desc The color of the border (e.g., #000000).
+ *
+ * @arg borderSize
+ * @type number
+ * @min -999999
+ * @text Border Size
+ * @desc The size of the border.
+ *
+ * @arg animationEnabled
+ * @type boolean
+ * @text Animation Enabled
+ * @desc Enable or disable the breathing animation.
+ * @default false
+ *
+ * @arg animationIntensity
+ * @type number
+ * @min -999999
+ * @text Animation Intensity
+ * @desc The intensity of the breathing animation.
+ *
+ * @arg animationSpeed
+ * @type number
+ * @min -999999
+ * @text Animation Speed
+ * @desc The speed of the breathing animation.
+ *
  * @arg x
  * @type number
  * @min -999999
@@ -125,7 +154,6 @@
  * @desc The ID of the image to remove.
  */
 
-
 var $3DImages = $3DImages || [];
 
 PluginManager.registerCommand('Simple3DImage', 'show3DImage', args => {
@@ -144,6 +172,11 @@ PluginManager.registerCommand('Simple3DImage', 'show3DImage', args => {
     const shadowX = Number(args.shadowX);
     const shadowY = Number(args.shadowY);
     const shadowColor = args.shadowColor ? parseInt(args.shadowColor.replace("#", "0x")) : null;
+    const borderColor = args.borderColor ? parseInt(args.borderColor.replace("#", "0x")) : null;
+    const borderSize = Number(args.borderSize);
+    const animationEnabled = args.animationEnabled === "true";
+    const animationIntensity = Number(args.animationIntensity);
+    const animationSpeed = Number(args.animationSpeed);
     const x = Number(args.x);
     const y = Number(args.y);
     const z = Number(args.z);
@@ -202,6 +235,21 @@ PluginManager.registerCommand('Simple3DImage', 'show3DImage', args => {
         shadowSprite.tint = shadowColor;
         shadowSprite.alpha = 0.5;
         SceneManager._scene._spriteset.addChild(shadowSprite);
+    }
+
+    // Apply border
+    if (borderColor && borderSize) {
+        const graphics = new PIXI.Graphics();
+        graphics.lineStyle(borderSize, borderColor);
+        graphics.drawRect(0, 0, sprite.width, sprite.height);
+        sprite.addChild(graphics);
+    }
+
+    // Apply breathing animation
+    if (animationEnabled) {
+        sprite.update = function() {
+            this.scale.y = 1 + Math.sin(Graphics.frameCount / animationSpeed) * animationIntensity / 100;
+        };
     }
 
     $3DImages[imageId] = sprite;
