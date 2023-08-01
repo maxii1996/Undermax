@@ -126,6 +126,11 @@ PluginManager.registerCommand('Simple3DImage', 'show3DImage', args => {
     const mirrorX = args.mirrorX === "true";
     const mirrorY = args.mirrorY === "true";
     const smoothing = args.smoothing === "true";
+    const glowColor = String(args.glowColor);
+    const glowIntensity = Number(args.glowIntensity);
+    const shadowX = Number(args.shadowX);
+    const shadowY = Number(args.shadowY);
+    const shadowColor = String(args.shadowColor);
     const x = Number(args.x);
     const y = Number(args.y);
     const z = Number(args.z);
@@ -155,6 +160,36 @@ PluginManager.registerCommand('Simple3DImage', 'show3DImage', args => {
 
     // Apply smoothing
     sprite.bitmap.smooth = smoothing;
+
+    // Create a glow effect using a blurred copy of the sprite
+    if (glowColor) {
+        const glowSprite = new Sprite(sprite.bitmap);
+        glowSprite.x = sprite.x;
+        glowSprite.y = sprite.y;
+        glowSprite.z = sprite.z;
+        glowSprite.scale.x = sprite.scale.x;
+        glowSprite.scale.y = sprite.scale.y;
+        glowSprite.skew.x = sprite.skew.x;
+        glowSprite.skew.y = sprite.skew.y;
+        glowSprite.filters = [new PIXI.filters.BlurFilter(glowIntensity)];
+        glowSprite.tint = parseInt(glowColor.replace("#", "0x"));
+        SceneManager._scene._spriteset.addChild(glowSprite);
+    }
+
+    // Create a shadow effect using a darkened copy of the sprite
+    if (shadowColor) {
+        const shadowSprite = new Sprite(sprite.bitmap);
+        shadowSprite.x = sprite.x + shadowX;
+        shadowSprite.y = sprite.y + shadowY;
+        shadowSprite.z = sprite.z;
+        shadowSprite.scale.x = sprite.scale.x;
+        shadowSprite.scale.y = sprite.scale.y;
+        shadowSprite.skew.x = sprite.skew.x;
+        shadowSprite.skew.y = sprite.skew.y;
+        shadowSprite.tint = parseInt(shadowColor.replace("#", "0x"));
+        shadowSprite.alpha = 0.5;
+        SceneManager._scene._spriteset.addChild(shadowSprite);
+    }
 
     $3DImages[imageId] = sprite;
 
