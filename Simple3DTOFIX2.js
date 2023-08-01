@@ -219,7 +219,6 @@ PluginManager.registerCommand('Simple3DImage', 'show3DImage', args => {
     const blendMode = String(args.blendMode);
     const tintColor = args.tintColor ? parseInt(args.tintColor.replace("#", "0x")) : null;
 
-
     const sprite = new Sprite();
     sprite.bitmap = ImageManager.loadPicture(imageName);
     sprite.x = x;
@@ -302,8 +301,7 @@ PluginManager.registerCommand('Simple3DImage', 'show3DImage', args => {
             console.log("Shadow effect applied:", shadowColor);
         }
 
-
-        sprite.opacity = opacity / 100;
+        sprite.opacity = opacity * 255 / 100; // Corrección aquí
 
         switch (blendMode) {
             case "Additive":
@@ -319,28 +317,18 @@ PluginManager.registerCommand('Simple3DImage', 'show3DImage', args => {
                 sprite.blendMode = PIXI.BLEND_MODES.NORMAL;
                 break;
         }
-    
+
         if (tintColor) {
             sprite.tint = tintColor;
         }
-
-        
 
         $3DImages[imageId] = sprite;
 
         SceneManager._scene._spriteset.addChild(sprite);
         console.log("3D Image added:", sprite);
-
-
-
-
-
-
-
-
-
     });
 });
+
 
 PluginManager.registerCommand('Simple3DImage', 'removeImage', args => {
     console.log("Removing 3D Image:", args);
