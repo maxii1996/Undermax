@@ -22,10 +22,28 @@
  * @text Image Name
  * @desc The name of the image file.
  *
- * @arg perspective
+ * @arg sizeMode
+ * @type select
+ * @text Size Mode
+ * @desc Choose whether to use automatic or custom size.
+ * @option Automatic
+ * @option Custom
+ * @default Automatic
+ *
+ * @arg customWidth
  * @type number
- * @text Perspective
- * @desc The perspective of the 3D image.
+ * @text Custom Width
+ * @desc The custom width of the image.
+ *
+ * @arg customHeight
+ * @type number
+ * @text Custom Height
+ * @desc The custom height of the image.
+ *
+ * @arg tilt
+ * @type number
+ * @text Tilt
+ * @desc The tilt of the image to simulate perspective.
  *
  * @arg x
  * @type number
@@ -54,10 +72,14 @@
 
 var $3DImages = $3DImages || [];
 
-PluginManager.registerCommand('YourPluginName', 'show3DImage', args => {
+PluginManager.registerCommand('Simple3DImage', 'show3DImage', args => {
+    console.log("Showing 3D Image:", args);
     const imageId = Number(args.imageId);
     const imageName = String(args.imageName);
-    const perspective = Number(args.perspective);
+    const sizeMode = String(args.sizeMode);
+    const customWidth = Number(args.customWidth);
+    const customHeight = Number(args.customHeight);
+    const tilt = Number(args.tilt);
     const x = Number(args.x);
     const y = Number(args.y);
     const z = Number(args.z);
@@ -67,19 +89,27 @@ PluginManager.registerCommand('YourPluginName', 'show3DImage', args => {
     sprite.x = x;
     sprite.y = y;
     sprite.z = z;
-    sprite.scale.x = perspective;
-    sprite.scale.y = perspective;
+
+    if (sizeMode === "Custom") {
+        sprite.scale.x = customWidth / sprite.width;
+        sprite.scale.y = customHeight / sprite.height;
+    }
+
+    sprite.setTransform(0, tilt, 0, 0, 0, 0);
 
     $3DImages[imageId] = sprite;
 
-    SceneManager._scene._spriteset._tilemap.addChild(sprite);
+    SceneManager._scene._spriteset.addChild(sprite);
+    console.log("3D Image added:", sprite);
 });
 
-PluginManager.registerCommand('YourPluginName', 'removeImage', args => {
+PluginManager.registerCommand('Simple3DImage', 'removeImage', args => {
+    console.log("Removing 3D Image:", args);
     const imageId = Number(args.imageId);
     const sprite = $3DImages[imageId];
     if (sprite) {
-        SceneManager._scene._spriteset._tilemap.removeChild(sprite);
+        SceneManager._scene._spriteset.removeChild(sprite);
         $3DImages[imageId] = null;
+        console.log("3D Image removed:", imageId);
     }
 });
