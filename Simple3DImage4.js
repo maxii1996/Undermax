@@ -126,11 +126,6 @@ PluginManager.registerCommand('Simple3DImage', 'show3DImage', args => {
     const mirrorX = args.mirrorX === "true";
     const mirrorY = args.mirrorY === "true";
     const smoothing = args.smoothing === "true";
-    const glowColor = String(args.glowColor);
-    const glowIntensity = Number(args.glowIntensity);
-    const shadowX = Number(args.shadowX);
-    const shadowY = Number(args.shadowY);
-    const shadowColor = String(args.shadowColor);
     const x = Number(args.x);
     const y = Number(args.y);
     const z = Number(args.z);
@@ -160,25 +155,6 @@ PluginManager.registerCommand('Simple3DImage', 'show3DImage', args => {
 
     // Apply smoothing
     sprite.bitmap.smooth = smoothing;
-
-    // Apply glow effect
-    if (glowColor) {
-        const filter = new PIXI.filters.GlowFilter({
-            color: glowColor,
-            outerStrength: glowIntensity
-        });
-        sprite.filters = [filter];
-    }
-
-    // Apply shadow effect
-    if (shadowColor) {
-        const shadow = new PIXI.filters.DropShadowFilter();
-        shadow.color = shadowColor;
-        shadow.alpha = 1;
-        shadow.distance = Math.sqrt(shadowX * shadowX + shadowY * shadowY);
-        shadow.angle = Math.atan2(shadowY, shadowX);
-        sprite.filters = sprite.filters ? sprite.filters.concat(shadow) : [shadow];
-    }
 
     $3DImages[imageId] = sprite;
 
