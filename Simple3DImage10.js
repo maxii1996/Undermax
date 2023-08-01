@@ -1,22 +1,18 @@
 /*:
  * @target MZ
- * @plugindesc Plugin to display 3D images on the map
+ * @plugindesc Simple 3D Image Display
  * @author Maxii1996 | Undermax Games
  * @url https://undermax.itch.io/
  *
- * @help
- * Use the plugin command "Show 3D Image" to display a 3D image.
- * Use the plugin command "Remove Image" to remove the image by its ID.
- *
  * @command show3DImage
  * @text Show 3D Image
- * @desc Show a 3D image on the map.
+ * @desc Show a 3D image on the screen.
  *
  * @arg imageId
  * @type number
- * @min -999999
+ * @min 0
  * @text Image ID
- * @desc The ID of the image.
+ * @desc The ID of the image. Use the same ID to refer to this image later.
  *
  * @arg imageName
  * @type file
@@ -26,29 +22,33 @@
  *
  * @arg sizeMode
  * @type select
- * @text Size Mode
- * @desc Choose whether to use automatic or custom size.
  * @option Automatic
  * @option Custom
+ * @text Size Mode
+ * @desc Choose whether to use the original size of the image or a custom size.
  * @default Automatic
  *
  * @arg customWidth
  * @type number
- * @min -999999
+ * @min 1
  * @text Custom Width
  * @desc The custom width of the image.
+ * @default 100
  *
  * @arg customHeight
  * @type number
- * @min -999999
+ * @min 1
  * @text Custom Height
  * @desc The custom height of the image.
+ * @default 100
  *
  * @arg tilt
  * @type number
- * @min -999999
+ * @min -100
+ * @max 100
  * @text Tilt
  * @desc The tilt of the image to simulate perspective.
+ * @default 0
  *
  * @arg mirrorX
  * @type boolean
@@ -69,93 +69,100 @@
  * @default true
  *
  * @arg glowColor
- * @type text
+ * @type color
  * @text Glow Color
- * @desc The color of the glow effect (e.g., #FF0000).
+ * @desc The color of the glow effect.
+ * @default #ffffff
  *
  * @arg glowIntensity
  * @type number
- * @min -999999
+ * @min 0
  * @text Glow Intensity
  * @desc The intensity of the glow effect.
+ * @default 0
  *
  * @arg shadowX
  * @type number
- * @min -999999
  * @text Shadow X
- * @desc The X position of the shadow.
+ * @desc The X offset of the shadow.
+ * @default 0
  *
  * @arg shadowY
  * @type number
- * @min -999999
  * @text Shadow Y
- * @desc The Y position of the shadow.
+ * @desc The Y offset of the shadow.
+ * @default 0
  *
  * @arg shadowColor
- * @type text
+ * @type color
  * @text Shadow Color
- * @desc The color of the shadow (e.g., #000000).
+ * @desc The color of the shadow.
+ * @default #000000
  *
  * @arg borderColor
- * @type text
+ * @type color
  * @text Border Color
- * @desc The color of the border (e.g., #000000).
+ * @desc The color of the border.
+ * @default #ffffff
  *
  * @arg borderSize
  * @type number
- * @min -999999
+ * @min 0
  * @text Border Size
  * @desc The size of the border.
+ * @default 0
  *
  * @arg animationEnabled
  * @type boolean
  * @text Animation Enabled
- * @desc Enable or disable the breathing animation.
+ * @desc Enable breathing animation.
  * @default false
  *
  * @arg animationIntensity
  * @type number
- * @min -999999
+ * @min 0
  * @text Animation Intensity
  * @desc The intensity of the breathing animation.
+ * @default 0
  *
  * @arg animationSpeed
  * @type number
- * @min -999999
+ * @min 1
  * @text Animation Speed
  * @desc The speed of the breathing animation.
+ * @default 60
  *
  * @arg x
  * @type number
- * @min -999999
  * @text X Position
- * @desc The X position of the image.
+ * @desc The X position of the image on the screen.
+ * @default 0
  *
  * @arg y
  * @type number
- * @min -999999
  * @text Y Position
- * @desc The Y position of the image.
+ * @desc The Y position of the image on the screen.
+ * @default 0
  *
  * @arg z
  * @type number
- * @min -999999
+ * @min -1000
+ * @max 1000
  * @text Z Position
- * @desc The Z position of the image.
+ * @desc The Z position of the image to simulate depth.
+ * @default 0
  *
  * @command removeImage
  * @text Remove Image
- * @desc Remove the image by its ID.
+ * @desc Remove a 3D image from the screen.
  *
  * @arg imageId
  * @type number
- * @min -999999
+ * @min 0
  * @text Image ID
  * @desc The ID of the image to remove.
+ *
  */
-
-
-
 
 var $3DImages = $3DImages || [];
 
@@ -190,7 +197,9 @@ PluginManager.registerCommand('Simple3DImage', 'show3DImage', args => {
     sprite.y = y;
     sprite.z = z;
 
-    // Wait for the bitmap to load before applying transformations
+    let glowSprite = null;
+    let shadowSprite = null;
+
     sprite.bitmap.addLoadListener(() => {
         if (sizeMode === "Custom") {
             sprite.scale.x = customWidth / sprite.width;
@@ -234,7 +243,7 @@ PluginManager.registerCommand('Simple3DImage', 'show3DImage', args => {
 
         // Create a glow effect using a blurred copy of the sprite
         if (glowColor) {
-            const glowSprite = new Sprite(sprite.bitmap);
+            glowSprite = new Sprite(sprite.bitmap);
             glowSprite.x = sprite.x;
             glowSprite.y = sprite.y;
             glowSprite.z = sprite.z;
@@ -250,7 +259,7 @@ PluginManager.registerCommand('Simple3DImage', 'show3DImage', args => {
 
         // Create a shadow effect using a darkened copy of the sprite
         if (shadowColor) {
-            const shadowSprite = new Sprite(sprite.bitmap);
+            shadowSprite = new Sprite(sprite.bitmap);
             shadowSprite.x = sprite.x + shadowX;
             shadowSprite.y = sprite.y + shadowY;
             shadowSprite.z = sprite.z;
