@@ -44,6 +44,12 @@
  * @desc The tint color of the image.
  * @default #ffffff
  *
+ * @arg enableTintFilter
+ * @type boolean
+ * @text Enable Tint Filter
+ * @desc Enable or disable the tint filter.
+ * @default true
+ *
  * @arg sizeMode
  * @type select
  * @option Automatic
@@ -217,7 +223,8 @@ PluginManager.registerCommand('Simple3DImage', 'show3DImage', args => {
     const z = Number(args.z);
     const opacity = Number(args.opacity);
     const blendMode = String(args.blendMode);
-    const tintColor = args.tintColor ? parseInt(args.tintColor.replace("#", "0x")) : null;
+    const enableTintFilter = args.enableTintFilter === "true";
+    const tintColor = enableTintFilter && args.tintColor ? parseInt(args.tintColor.replace("#", "0x")) : null;
 
     const sprite = new Sprite();
     sprite.bitmap = ImageManager.loadPicture(imageName);
@@ -328,7 +335,6 @@ PluginManager.registerCommand('Simple3DImage', 'show3DImage', args => {
         console.log("3D Image added:", sprite);
     });
 });
-
 
 PluginManager.registerCommand('Simple3DImage', 'removeImage', args => {
     console.log("Removing 3D Image:", args);
