@@ -208,7 +208,12 @@
  *
  */
 
+
 var $3DImages = $3DImages || [];
+var $3DImageLayer = new PIXI.Container();
+
+// Agregar la capa a la escena base
+SceneManager._scene.addChild($3DImageLayer);
 
 PluginManager.registerCommand('Simple3DImage', 'show3DImage', args => {
     console.log("Showing 3D Image:", args);
@@ -243,7 +248,7 @@ PluginManager.registerCommand('Simple3DImage', 'show3DImage', args => {
 
     // Remove existing sprite with the same ID if it exists
     if ($3DImages[imageId]) {
-        SceneManager._scene._spriteset.removeChild($3DImages[imageId]);
+        $3DImageLayer.removeChild($3DImages[imageId]);
         $3DImages[imageId] = null;
     }
 
@@ -309,7 +314,7 @@ PluginManager.registerCommand('Simple3DImage', 'show3DImage', args => {
             glowSprite.skew.y = sprite.skew.y;
             glowSprite.filters = [new PIXI.filters.BlurFilter(glowIntensity)];
             glowSprite.tint = glowColor;
-            SceneManager._scene._spriteset.addChild(glowSprite);
+            $3DImageLayer.addChild(glowSprite);
             console.log("Glow effect applied:", glowColor, glowIntensity);
         }
 
@@ -324,7 +329,7 @@ PluginManager.registerCommand('Simple3DImage', 'show3DImage', args => {
             shadowSprite.skew.x = sprite.skew.x;
             shadowSprite.skew.y = sprite.skew.y;
             shadowSprite.tint = shadowColor;
-            SceneManager._scene._spriteset.addChild(shadowSprite);
+            $3DImageLayer.addChild(shadowSprite);
             console.log("Shadow effect applied:", shadowColor, shadowX, shadowY);
         }
 
@@ -361,7 +366,8 @@ PluginManager.registerCommand('Simple3DImage', 'show3DImage', args => {
 
         $3DImages[imageId] = sprite;
 
-        SceneManager._scene._spriteset.addChild(sprite);
+        // Add the sprite to the custom layer
+        $3DImageLayer.addChild(sprite);
         console.log("3D Image added:", sprite);
     });
 });
@@ -371,7 +377,8 @@ PluginManager.registerCommand('Simple3DImage', 'removeImage', args => {
     const imageId = Number(args.imageId);
     const sprite = $3DImages[imageId];
     if (sprite) {
-        SceneManager._scene._spriteset.removeChild(sprite);
+        // Remove the sprite from the custom layer
+        $3DImageLayer.removeChild(sprite);
         $3DImages[imageId] = null;
         console.log("3D Image removed:", imageId);
     } else {
