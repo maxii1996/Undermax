@@ -1,3 +1,214 @@
+/*:
+ * @target MZ
+ * @plugindesc Simple 3D Image Display with Additional Customizations
+ * @author Maxii1996 | Undermax Games
+ * @url https://undermax.itch.io/
+ *
+ * @command show3DImage
+ * @text Show 3D Image
+ * @desc Show a 3D image on the screen.
+ *
+ * @arg imageId
+ * @type number
+ * @min 0
+ * @text Image ID
+ * @desc The ID of the image. Use the same ID to refer to this image later.
+ *
+ * @arg imageName
+ * @type file
+ * @dir img/pictures
+ * @text Image Name
+ * @desc The name of the image file.
+ *
+ * @arg opacity
+ * @type number
+ * @min 0
+ * @max 100
+ * @text Opacity
+ * @desc The opacity of the image.
+ * @default 100
+ *
+ * @arg blendMode
+ * @type select
+ * @option Normal
+ * @option Additive
+ * @option Multiply
+ * @option Screen
+ * @text Blend Mode
+ * @desc The blend mode of the image.
+ * @default Normal
+ *
+ * @arg blurEffect
+ * @type boolean
+ * @text Enable Blur Effect
+ * @desc Enable or disable the blur effect.
+ * @default false
+ *
+ * @arg blurIntensity
+ * @type number
+ * @min 0
+ * @max 100
+ * @text Blur Intensity
+ * @desc The intensity of the blur effect.
+ * @default 10
+ *
+ * @arg tintColor
+ * @type text
+ * @text Tint Color
+ * @desc The tint color of the image.
+ * @default #ffffff
+ *
+ * @arg enableTintFilter
+ * @type boolean
+ * @text Enable Tint Filter
+ * @desc Enable or disable the tint filter.
+ * @default true
+ *
+ * @arg sizeMode
+ * @type select
+ * @option Automatic
+ * @option Custom
+ * @text Size Mode
+ * @desc Choose whether to use the original size of the image or a custom size.
+ * @default Automatic
+ *
+ * @arg customWidth
+ * @type number
+ * @min 1
+ * @text Custom Width
+ * @desc The custom width of the image.
+ * @default 100
+ *
+ * @arg customHeight
+ * @type number
+ * @min 1
+ * @text Custom Height
+ * @desc The custom height of the image.
+ * @default 100
+ *
+ * @arg tilt
+ * @type number
+ * @min -100
+ * @max 100
+ * @text Tilt
+ * @desc The tilt of the image to simulate perspective.
+ * @default 0
+ *
+ * @arg mirrorX
+ * @type boolean
+ * @text Mirror X
+ * @desc Mirror the image horizontally.
+ * @default false
+ *
+ * @arg mirrorY
+ * @type boolean
+ * @text Mirror Y
+ * @desc Mirror the image vertically.
+ * @default false
+ *
+ * @arg smoothing
+ * @type boolean
+ * @text Smoothing
+ * @desc Apply smoothing to the image.
+ * @default true
+ *
+ * @arg glowColor
+ * @type text
+ * @text Glow Color
+ * @desc The color of the glow effect.
+ * @default #ffffff
+ *
+ * @arg glowIntensity
+ * @type number
+ * @min 0
+ * @text Glow Intensity
+ * @desc The intensity of the glow effect.
+ * @default 0
+ *
+ * @arg shadowX
+ * @type number
+ * @text Shadow X
+ * @desc The X offset of the shadow.
+ * @default 0
+ *
+ * @arg shadowY
+ * @type number
+ * @text Shadow Y
+ * @desc The Y offset of the shadow.
+ * @default 0
+ *
+ * @arg shadowColor
+ * @type text
+ * @text Shadow Color
+ * @desc The color of the shadow.
+ * @default #000000
+ *
+ * @arg borderColor
+ * @type text
+ * @text Border Color
+ * @desc The color of the border.
+ * @default #ffffff
+ *
+ * @arg borderSize
+ * @type number
+ * @min 0
+ * @text Border Size
+ * @desc The size of the border.
+ * @default 0
+ *
+ * @arg animationEnabled
+ * @type boolean
+ * @text Animation Enabled
+ * @desc Enable breathing animation.
+ * @default false
+ *
+ * @arg animationIntensity
+ * @type number
+ * @min 0
+ * @text Animation Intensity
+ * @desc The intensity of the breathing animation.
+ * @default 0
+ *
+ * @arg animationSpeed
+ * @type number
+ * @min 1
+ * @text Animation Speed
+ * @desc The speed of the breathing animation.
+ * @default 60
+ *
+ * @arg x
+ * @type number
+ * @text X Position
+ * @desc The X position of the image on the screen.
+ * @default 0
+ *
+ * @arg y
+ * @type number
+ * @text Y Position
+ * @desc The Y position of the image on the screen.
+ * @default 0
+ *
+ * @arg z
+ * @type number
+ * @min -1000
+ * @max 1000
+ * @text Z Position
+ * @desc The Z position of the image to simulate depth.
+ * @default 0
+ *
+ * @command removeImage
+ * @text Remove Image
+ * @desc Remove a 3D image from the screen.
+ *
+ * @arg imageId
+ * @type number
+ * @min 0
+ * @text Image ID
+ * @desc The ID of the image to remove.
+ *
+ */
+
+
 
 var $3DImages = $3DImages || [];
 
