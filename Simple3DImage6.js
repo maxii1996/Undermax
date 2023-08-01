@@ -1,7 +1,8 @@
 /*:
  * @target MZ
  * @plugindesc Plugin to display 3D images on the map
- * @author Your Name
+ * @author Maxii1996 | Undermax Games
+ * @url https://undermax.itch.io/
  *
  * @help
  * Use the plugin command "Show 3D Image" to display a 3D image.
@@ -13,6 +14,7 @@
  *
  * @arg imageId
  * @type number
+ * @min -999999
  * @text Image ID
  * @desc The ID of the image.
  *
@@ -32,16 +34,19 @@
  *
  * @arg customWidth
  * @type number
+ * @min -999999
  * @text Custom Width
  * @desc The custom width of the image.
  *
  * @arg customHeight
  * @type number
+ * @min -999999
  * @text Custom Height
  * @desc The custom height of the image.
  *
  * @arg tilt
  * @type number
+ * @min -999999
  * @text Tilt
  * @desc The tilt of the image to simulate perspective.
  *
@@ -64,42 +69,48 @@
  * @default true
  *
  * @arg glowColor
- * @type color
+ * @type text
  * @text Glow Color
- * @desc The color of the glow effect.
+ * @desc The color of the glow effect (e.g., #FF0000).
  *
  * @arg glowIntensity
  * @type number
+ * @min -999999
  * @text Glow Intensity
  * @desc The intensity of the glow effect.
  *
  * @arg shadowX
  * @type number
+ * @min -999999
  * @text Shadow X
  * @desc The X position of the shadow.
  *
  * @arg shadowY
  * @type number
+ * @min -999999
  * @text Shadow Y
  * @desc The Y position of the shadow.
  *
  * @arg shadowColor
- * @type color
+ * @type text
  * @text Shadow Color
- * @desc The color of the shadow.
+ * @desc The color of the shadow (e.g., #000000).
  *
  * @arg x
  * @type number
+ * @min -999999
  * @text X Position
  * @desc The X position of the image.
  *
  * @arg y
  * @type number
+ * @min -999999
  * @text Y Position
  * @desc The Y position of the image.
  *
  * @arg z
  * @type number
+ * @min -999999
  * @text Z Position
  * @desc The Z position of the image.
  *
@@ -109,9 +120,11 @@
  *
  * @arg imageId
  * @type number
+ * @min -999999
  * @text Image ID
  * @desc The ID of the image to remove.
  */
+
 
 var $3DImages = $3DImages || [];
 
@@ -126,11 +139,11 @@ PluginManager.registerCommand('Simple3DImage', 'show3DImage', args => {
     const mirrorX = args.mirrorX === "true";
     const mirrorY = args.mirrorY === "true";
     const smoothing = args.smoothing === "true";
-    const glowColor = String(args.glowColor);
+    const glowColor = args.glowColor ? parseInt(args.glowColor.replace("#", "0x")) : null;
     const glowIntensity = Number(args.glowIntensity);
     const shadowX = Number(args.shadowX);
     const shadowY = Number(args.shadowY);
-    const shadowColor = String(args.shadowColor);
+    const shadowColor = args.shadowColor ? parseInt(args.shadowColor.replace("#", "0x")) : null;
     const x = Number(args.x);
     const y = Number(args.y);
     const z = Number(args.z);
@@ -172,7 +185,7 @@ PluginManager.registerCommand('Simple3DImage', 'show3DImage', args => {
         glowSprite.skew.x = sprite.skew.x;
         glowSprite.skew.y = sprite.skew.y;
         glowSprite.filters = [new PIXI.filters.BlurFilter(glowIntensity)];
-        glowSprite.tint = parseInt(glowColor.replace("#", "0x"));
+        glowSprite.tint = glowColor;
         SceneManager._scene._spriteset.addChild(glowSprite);
     }
 
@@ -186,7 +199,7 @@ PluginManager.registerCommand('Simple3DImage', 'show3DImage', args => {
         shadowSprite.scale.y = sprite.scale.y;
         shadowSprite.skew.x = sprite.skew.x;
         shadowSprite.skew.y = sprite.skew.y;
-        shadowSprite.tint = parseInt(shadowColor.replace("#", "0x"));
+        shadowSprite.tint = shadowColor;
         shadowSprite.alpha = 0.5;
         SceneManager._scene._spriteset.addChild(shadowSprite);
     }
@@ -205,5 +218,7 @@ PluginManager.registerCommand('Simple3DImage', 'removeImage', args => {
         SceneManager._scene._spriteset.removeChild(sprite);
         $3DImages[imageId] = null;
         console.log("3D Image removed:", imageId);
+    } else {
+        console.log("3D Image not found:", imageId);
     }
 });
