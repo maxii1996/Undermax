@@ -154,6 +154,9 @@
  * @desc The ID of the image to remove.
  */
 
+
+
+
 var $3DImages = $3DImages || [];
 
 PluginManager.registerCommand('Simple3DImage', 'show3DImage', args => {
@@ -187,75 +190,85 @@ PluginManager.registerCommand('Simple3DImage', 'show3DImage', args => {
     sprite.y = y;
     sprite.z = z;
 
-    if (sizeMode === "Custom") {
-        sprite.scale.x = customWidth / sprite.width;
-        sprite.scale.y = customHeight / sprite.height;
-    }
+    // Wait for the bitmap to load before applying transformations
+    sprite.bitmap.addLoadListener(() => {
+        if (sizeMode === "Custom") {
+            sprite.scale.x = customWidth / sprite.width;
+            sprite.scale.y = customHeight / sprite.height;
+        }
 
-    // Apply a skew to simulate perspective
-    sprite.skew.x = tilt / 100;
-    sprite.skew.y = tilt / 100;
+        // Apply a skew to simulate perspective
+        sprite.skew.x = tilt / 100;
+        sprite.skew.y = tilt / 100;
 
-    // Apply a scale to simulate depth
-    sprite.scale.x *= (1 - z / 1000);
-    sprite.scale.y *= (1 - z / 1000);
+        // Apply a scale to simulate depth
+        sprite.scale.x *= (1 - z / 1000);
+        sprite.scale.y *= (1 - z / 1000);
 
-    // Apply mirror effects
-    if (mirrorX) sprite.scale.x *= -1;
-    if (mirrorY) sprite.scale.y *= -1;
+        // Apply mirror effects
+        if (mirrorX) sprite.scale.x *= -1;
+        if (mirrorY) sprite.scale.y *= -1;
 
-    // Apply smoothing
-    sprite.bitmap.smooth = smoothing;
+        // Apply smoothing
+        sprite.bitmap.smooth = smoothing;
 
-    // Create a glow effect using a blurred copy of the sprite
-    if (glowColor) {
-        const glowSprite = new Sprite(sprite.bitmap);
-        glowSprite.x = sprite.x;
-        glowSprite.y = sprite.y;
-        glowSprite.z = sprite.z;
-        glowSprite.scale.x = sprite.scale.x;
-        glowSprite.scale.y = sprite.scale.y;
-        glowSprite.skew.x = sprite.skew.x;
-        glowSprite.skew.y = sprite.skew.y;
-        glowSprite.filters = [new PIXI.filters.BlurFilter(glowIntensity)];
-        glowSprite.tint = glowColor;
-        SceneManager._scene._spriteset.addChild(glowSprite);
-    }
+        // Apply border
+        if (borderColor && borderSize) {
+            const graphics = new PIXI.Graphics();
+            graphics.lineStyle(borderSize, borderColor);
+            graphics.drawRect(0, 0, sprite.width, sprite.height);
+            sprite.addChild(graphics);
+            console.log("Border applied:", borderColor, borderSize);
+        }
 
-    // Create a shadow effect using a darkened copy of the sprite
-    if (shadowColor) {
-        const shadowSprite = new Sprite(sprite.bitmap);
-        shadowSprite.x = sprite.x + shadowX;
-        shadowSprite.y = sprite.y + shadowY;
-        shadowSprite.z = sprite.z;
-        shadowSprite.scale.x = sprite.scale.x;
-        shadowSprite.scale.y = sprite.scale.y;
-        shadowSprite.skew.x = sprite.skew.x;
-        shadowSprite.skew.y = sprite.skew.y;
-        shadowSprite.tint = shadowColor;
-        shadowSprite.alpha = 0.5;
-        SceneManager._scene._spriteset.addChild(shadowSprite);
-    }
+        // Apply breathing animation
+        if (animationEnabled) {
+            sprite.update = function() {
+                const scale = 1 + Math.sin(Graphics.frameCount / animationSpeed) * animationIntensity / 100;
+                this.scale.y = scale;
+                if (glowSprite) glowSprite.scale.y = scale;
+                if (shadowSprite) shadowSprite.scale.y = scale;
+            };
+            console.log("Breathing animation applied:", animationIntensity, animationSpeed);
+        }
 
-    // Apply border
-    if (borderColor && borderSize) {
-        const graphics = new PIXI.Graphics();
-        graphics.lineStyle(borderSize, borderColor);
-        graphics.drawRect(0, 0, sprite.width, sprite.height);
-        sprite.addChild(graphics);
-    }
+        // Create a glow effect using a blurred copy of the sprite
+        if (glowColor) {
+            const glowSprite = new Sprite(sprite.bitmap);
+            glowSprite.x = sprite.x;
+            glowSprite.y = sprite.y;
+            glowSprite.z = sprite.z;
+            glowSprite.scale.x = sprite.scale.x;
+            glowSprite.scale.y = sprite.scale.y;
+            glowSprite.skew.x = sprite.skew.x;
+            glowSprite.skew.y = sprite.skew.y;
+            glowSprite.filters = [new PIXI.filters.BlurFilter(glowIntensity)];
+            glowSprite.tint = glowColor;
+            SceneManager._scene._spriteset.addChild(glowSprite);
+            console.log("Glow effect applied:", glowColor, glowIntensity);
+        }
 
-    // Apply breathing animation
-    if (animationEnabled) {
-        sprite.update = function() {
-            this.scale.y = 1 + Math.sin(Graphics.frameCount / animationSpeed) * animationIntensity / 100;
-        };
-    }
+        // Create a shadow effect using a darkened copy of the sprite
+        if (shadowColor) {
+            const shadowSprite = new Sprite(sprite.bitmap);
+            shadowSprite.x = sprite.x + shadowX;
+            shadowSprite.y = sprite.y + shadowY;
+            shadowSprite.z = sprite.z;
+            shadowSprite.scale.x = sprite.scale.x;
+            shadowSprite.scale.y = sprite.scale.y;
+            shadowSprite.skew.x = sprite.skew.x;
+            shadowSprite.skew.y = sprite.skew.y;
+            shadowSprite.tint = shadowColor;
+            shadowSprite.alpha = 0.5;
+            SceneManager._scene._spriteset.addChild(shadowSprite);
+            console.log("Shadow effect applied:", shadowColor);
+        }
 
-    $3DImages[imageId] = sprite;
+        $3DImages[imageId] = sprite;
 
-    SceneManager._scene._spriteset.addChild(sprite);
-    console.log("3D Image added:", sprite);
+        SceneManager._scene._spriteset.addChild(sprite);
+        console.log("3D Image added:", sprite);
+    });
 });
 
 PluginManager.registerCommand('Simple3DImage', 'removeImage', args => {
