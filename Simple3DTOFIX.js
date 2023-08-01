@@ -1,6 +1,6 @@
 /*:
  * @target MZ
- * @plugindesc Simple 3D Image Display
+ * @plugindesc Simple 3D Image Display with Additional Customizations
  * @author Maxii1996 | Undermax Games
  * @url https://undermax.itch.io/
  *
@@ -19,6 +19,30 @@
  * @dir img/pictures
  * @text Image Name
  * @desc The name of the image file.
+ *
+ * @arg opacity
+ * @type number
+ * @min 0
+ * @max 100
+ * @text Opacity
+ * @desc The opacity of the image.
+ * @default 100
+ *
+ * @arg blendMode
+ * @type select
+ * @option Normal
+ * @option Additive
+ * @option Multiply
+ * @option Screen
+ * @text Blend Mode
+ * @desc The blend mode of the image.
+ * @default Normal
+ *
+ * @arg tintColor
+ * @type text
+ * @text Tint Color
+ * @desc The tint color of the image.
+ * @default #ffffff
  *
  * @arg sizeMode
  * @type select
@@ -191,6 +215,10 @@ PluginManager.registerCommand('Simple3DImage', 'show3DImage', args => {
     const x = Number(args.x);
     const y = Number(args.y);
     const z = Number(args.z);
+    const opacity = Number(args.opacity);
+    const blendMode = String(args.blendMode);
+    const tintColor = args.tintColor ? parseInt(args.tintColor.replace("#", "0x")) : null;
+
 
     const sprite = new Sprite();
     sprite.bitmap = ImageManager.loadPicture(imageName);
@@ -274,10 +302,43 @@ PluginManager.registerCommand('Simple3DImage', 'show3DImage', args => {
             console.log("Shadow effect applied:", shadowColor);
         }
 
+
+        sprite.opacity = opacity / 100;
+
+        switch (blendMode) {
+            case "Additive":
+                sprite.blendMode = PIXI.BLEND_MODES.ADD;
+                break;
+            case "Multiply":
+                sprite.blendMode = PIXI.BLEND_MODES.MULTIPLY;
+                break;
+            case "Screen":
+                sprite.blendMode = PIXI.BLEND_MODES.SCREEN;
+                break;
+            default:
+                sprite.blendMode = PIXI.BLEND_MODES.NORMAL;
+                break;
+        }
+    
+        if (tintColor) {
+            sprite.tint = tintColor;
+        }
+
+        
+
         $3DImages[imageId] = sprite;
 
         SceneManager._scene._spriteset.addChild(sprite);
         console.log("3D Image added:", sprite);
+
+
+
+
+
+
+
+
+
     });
 });
 
