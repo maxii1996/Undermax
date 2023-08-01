@@ -69,7 +69,7 @@
  * @default true
  *
  * @arg glowColor
- * @type color
+ * @type text
  * @text Glow Color
  * @desc The color of the glow effect.
  * @default #ffffff
@@ -94,13 +94,13 @@
  * @default 0
  *
  * @arg shadowColor
- * @type color
+ * @type text
  * @text Shadow Color
  * @desc The color of the shadow.
  * @default #000000
  *
  * @arg borderColor
- * @type color
+ * @type text
  * @text Border Color
  * @desc The color of the border.
  * @default #ffffff
@@ -163,6 +163,7 @@
  * @desc The ID of the image to remove.
  *
  */
+
 
 var $3DImages = $3DImages || [];
 
