@@ -208,9 +208,8 @@
  *
  */
 
-
-
 var $3DImages = $3DImages || [];
+var $3DImageInfo = $3DImageInfo || [];
 
 PluginManager.registerCommand('Simple3DImage', 'show3DImage', args => {
     console.log("Showing 3D Image:", args);
@@ -242,6 +241,9 @@ PluginManager.registerCommand('Simple3DImage', 'show3DImage', args => {
     const tintColor = enableTintFilter && args.tintColor ? parseInt(args.tintColor.replace("#", "0x")) : null;
     const blurEffect = args.blurEffect === "true";
     const blurIntensity = Number(args.blurIntensity);
+
+    // Almacenar la información de la imagen en una variable global
+    $3DImageInfo[imageId] = args;
 
     // Remove existing sprite with the same ID if it exists
     if ($3DImages[imageId]) {
@@ -380,3 +382,15 @@ PluginManager.registerCommand('Simple3DImage', 'removeImage', args => {
         console.log("3D Image not found:", imageId);
     }
 });
+
+// Sobrescribir la función que maneja el cambio de escena
+var _Scene_Map_onMapLoaded = Scene_Map.prototype.onMapLoaded;
+Scene_Map.prototype.onMapLoaded = function() {
+    _Scene_Map_onMapLoaded.call(this);
+    // Recrear las imágenes 3D en la nueva escena
+    $3DImageInfo.forEach((args, imageId) => {
+        if (args) {
+            PluginManager.callCommand(this, 'Simple3DImage', 'show3DImage', args);
+        }
+    });
+};
