@@ -20,18 +20,7 @@
  * @text Image Name
  * @desc The name of the image file.
  * 
- * @arg fadeInDuration
- * @type number
- * @min 0
- * @text Fade In Duration
- * @desc The duration of the fade-in effect in frames.
- * @default 0
- *
- * @arg fadeOutDuration
- * @type number
- * @min 0
- * @text Fade Out Duration
- * @desc The duration of the fade-out effect in frames.
+ * 
  *
  * @arg opacity
  * @type number
@@ -221,7 +210,6 @@
  *
  */
 
-
 var $3DImages = $3DImages || [];
 var $3DImageInfo = $3DImageInfo || [];
 
@@ -255,8 +243,8 @@ PluginManager.registerCommand('Simple3DImage', 'show3DImage', args => {
     const tintColor = enableTintFilter && args.tintColor ? parseInt(args.tintColor.replace("#", "0x")) : null;
     const blurEffect = args.blurEffect === "true";
     const blurIntensity = Number(args.blurIntensity);
-    const fadeInDuration = Number(args.fadeInDuration); // Agregar esta línea
 
+ 
     $3DImageInfo[imageId] = args;
 
     if ($3DImages[imageId]) {
@@ -271,8 +259,6 @@ PluginManager.registerCommand('Simple3DImage', 'show3DImage', args => {
     sprite.x = x;
     sprite.y = y;
     sprite.z = z;
-    sprite.opacity = 0; // Inicializa la opacidad en 0 para el efecto de Fade In
-    sprite.targetOpacity = opacity * 2.55; // La opacidad objetivo para el Fade In
 
     let glowSprite = null;
     let shadowSprite = null;
@@ -283,13 +269,19 @@ PluginManager.registerCommand('Simple3DImage', 'show3DImage', args => {
             sprite.scale.y = customHeight / sprite.height;
         }
 
+
         sprite.skew.x = tilt / 100;
         sprite.skew.y = tilt / 100;
+
+ 
         sprite.scale.x *= (1 - z / 1000);
         sprite.scale.y *= (1 - z / 1000);
 
+
         if (mirrorX) sprite.scale.x *= -1;
         if (mirrorY) sprite.scale.y *= -1;
+
+   
         sprite.bitmap.smooth = smoothing;
 
         if (borderColor && borderSize) {
@@ -300,21 +292,18 @@ PluginManager.registerCommand('Simple3DImage', 'show3DImage', args => {
             console.log("Border applied:", borderColor, borderSize);
         }
 
+
         if (animationEnabled) {
             sprite.update = function() {
                 const scale = 1 + Math.sin(Graphics.frameCount / animationSpeed) * animationIntensity / 100;
                 this.scale.y = scale;
                 if (glowSprite) glowSprite.scale.y = scale;
                 if (shadowSprite) shadowSprite.scale.y = scale;
-
-                // Aplicar el efecto de Fade In
-                if (fadeInDuration > 0 && this.opacity < this.targetOpacity) {
-                    this.opacity += this.targetOpacity / fadeInDuration;
-                }
             };
             console.log("Breathing animation applied:", animationIntensity, animationSpeed);
         }
 
+      
         if (glowColor) {
             glowSprite = new Sprite(sprite.bitmap);
             glowSprite.x = sprite.x;
@@ -330,6 +319,7 @@ PluginManager.registerCommand('Simple3DImage', 'show3DImage', args => {
             console.log("Glow effect applied:", glowColor, glowIntensity);
         }
 
+ 
         if (shadowColor) {
             shadowSprite = new Sprite(sprite.bitmap);
             shadowSprite.x = sprite.x + shadowX;
@@ -344,18 +334,22 @@ PluginManager.registerCommand('Simple3DImage', 'show3DImage', args => {
             console.log("Shadow effect applied:", shadowColor, shadowX, shadowY);
         }
 
+     
         if (tintColor) {
             sprite.tint = tintColor;
             console.log("Tint filter applied:", tintColor);
         }
 
+      
         if (blurEffect) {
             sprite.filters = [new PIXI.filters.BlurFilter(blurIntensity)];
             console.log("Blur effect applied:", blurIntensity);
         }
 
+    
         sprite.opacity = opacity * 2.55;
 
+   
         switch (blendMode) {
             case "Additive":
                 sprite.blendMode = PIXI.BLEND_MODES.ADD;
@@ -382,29 +376,16 @@ PluginManager.registerCommand('Simple3DImage', 'removeImage', args => {
     console.log("Removing 3D Image:", args);
     const imageId = Number(args.imageId);
     const sprites = $3DImages[imageId];
-    const fadeOutDuration = Number($3DImageInfo[imageId].fadeOutDuration); // Agregar esta línea
-
     if (sprites) {
-        // Aplicar el efecto de Fade Out
-        if (fadeOutDuration > 0) {
-            sprites.main.targetOpacity = 0;
-            sprites.main.update = function() {
-                this.opacity -= this.targetOpacity / fadeOutDuration;
-                if (this.opacity <= 0) {
-                    SceneManager._scene._spriteset.removeChild(this);
-                    if (sprites.glow) SceneManager._scene._spriteset.removeChild(sprites.glow);
-                    if (sprites.shadow) SceneManager._scene._spriteset.removeChild(sprites.shadow);
-                    $3DImages[imageId] = null;
-                    $3DImageInfo[imageId] = null;
-                }
-            };
-        } else {
-            SceneManager._scene._spriteset.removeChild(sprites.main);
-            if (sprites.glow) SceneManager._scene._spriteset.removeChild(sprites.glow);
-            if (sprites.shadow) SceneManager._scene._spriteset.removeChild(sprites.shadow);
-            $3DImages[imageId] = null;
-            $3DImageInfo[imageId] = null;
-        }
+      
+        SceneManager._scene._spriteset.removeChild(sprites.main);
+
+      
+        if (sprites.glow) SceneManager._scene._spriteset.removeChild(sprites.glow);
+        if (sprites.shadow) SceneManager._scene._spriteset.removeChild(sprites.shadow);
+
+        $3DImages[imageId] = null;
+        $3DImageInfo[imageId] = null; 
 
         console.log("3D Image removed:", imageId);
     } else {
@@ -412,9 +393,14 @@ PluginManager.registerCommand('Simple3DImage', 'removeImage', args => {
     }
 });
 
+
+
+
+
 var _Scene_Map_onMapLoaded = Scene_Map.prototype.onMapLoaded;
 Scene_Map.prototype.onMapLoaded = function() {
     _Scene_Map_onMapLoaded.call(this);
+ 
     $3DImageInfo.forEach((args, imageId) => {
         if (args) {
             PluginManager.callCommand(this, 'Simple3DImage', 'show3DImage', args);
