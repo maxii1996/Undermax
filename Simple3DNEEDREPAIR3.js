@@ -242,10 +242,9 @@ PluginManager.registerCommand('Simple3DImage', 'show3DImage', args => {
     const blurEffect = args.blurEffect === "true";
     const blurIntensity = Number(args.blurIntensity);
 
-    // Almacenar la información de la imagen en una variable global
+ 
     $3DImageInfo[imageId] = args;
 
-    // Remove existing sprite with the same ID if it exists
     if ($3DImages[imageId]) {
         SceneManager._scene._spriteset.removeChild($3DImages[imageId]);
         $3DImages[imageId] = null;
@@ -266,22 +265,21 @@ PluginManager.registerCommand('Simple3DImage', 'show3DImage', args => {
             sprite.scale.y = customHeight / sprite.height;
         }
 
-        // Apply a skew to simulate perspective
+
         sprite.skew.x = tilt / 100;
         sprite.skew.y = tilt / 100;
 
-        // Apply a scale to simulate depth
+ 
         sprite.scale.x *= (1 - z / 1000);
         sprite.scale.y *= (1 - z / 1000);
 
-        // Apply mirror effects
+
         if (mirrorX) sprite.scale.x *= -1;
         if (mirrorY) sprite.scale.y *= -1;
 
-        // Apply smoothing
+   
         sprite.bitmap.smooth = smoothing;
 
-        // Apply border
         if (borderColor && borderSize) {
             const graphics = new PIXI.Graphics();
             graphics.lineStyle(borderSize, borderColor);
@@ -290,7 +288,7 @@ PluginManager.registerCommand('Simple3DImage', 'show3DImage', args => {
             console.log("Border applied:", borderColor, borderSize);
         }
 
-        // Apply breathing animation
+
         if (animationEnabled) {
             sprite.update = function() {
                 const scale = 1 + Math.sin(Graphics.frameCount / animationSpeed) * animationIntensity / 100;
@@ -301,7 +299,7 @@ PluginManager.registerCommand('Simple3DImage', 'show3DImage', args => {
             console.log("Breathing animation applied:", animationIntensity, animationSpeed);
         }
 
-        // Create a glow effect using a blurred copy of the sprite
+      
         if (glowColor) {
             glowSprite = new Sprite(sprite.bitmap);
             glowSprite.x = sprite.x;
@@ -317,7 +315,7 @@ PluginManager.registerCommand('Simple3DImage', 'show3DImage', args => {
             console.log("Glow effect applied:", glowColor, glowIntensity);
         }
 
-        // Create a shadow effect using a darkened copy of the sprite
+ 
         if (shadowColor) {
             shadowSprite = new Sprite(sprite.bitmap);
             shadowSprite.x = sprite.x + shadowX;
@@ -332,22 +330,22 @@ PluginManager.registerCommand('Simple3DImage', 'show3DImage', args => {
             console.log("Shadow effect applied:", shadowColor, shadowX, shadowY);
         }
 
-        // Apply tint filter
+     
         if (tintColor) {
             sprite.tint = tintColor;
             console.log("Tint filter applied:", tintColor);
         }
 
-        // Apply blur effect if enabled
+      
         if (blurEffect) {
             sprite.filters = [new PIXI.filters.BlurFilter(blurIntensity)];
             console.log("Blur effect applied:", blurIntensity);
         }
 
-        // Apply opacity
+    
         sprite.opacity = opacity * 2.55;
 
-        // Apply blend mode
+   
         switch (blendMode) {
             case "Additive":
                 sprite.blendMode = PIXI.BLEND_MODES.ADD;
@@ -363,7 +361,7 @@ PluginManager.registerCommand('Simple3DImage', 'show3DImage', args => {
                 break;
         }
 
-        $3DImages[imageId] = sprite;
+        $3DImages[imageId] = { main: sprite, glow: glowSprite, shadow: shadowSprite };
 
         SceneManager._scene._spriteset.addChild(sprite);
         console.log("3D Image added:", sprite);
@@ -373,19 +371,17 @@ PluginManager.registerCommand('Simple3DImage', 'show3DImage', args => {
 PluginManager.registerCommand('Simple3DImage', 'removeImage', args => {
     console.log("Removing 3D Image:", args);
     const imageId = Number(args.imageId);
-    const sprite = $3DImages[imageId];
-    if (sprite) {
-        // Eliminar la imagen principal
-        SceneManager._scene._spriteset.removeChild(sprite);
-        $3DImages[imageId] = null;
-        $3DImageInfo[imageId] = null; // Eliminar también la información de la imagen
+    const sprites = $3DImages[imageId];
+    if (sprites) {
+      
+        SceneManager._scene._spriteset.removeChild(sprites.main);
 
-        // Eliminar los efectos de resplandor y sombra
-        SceneManager._scene._spriteset.children.forEach(child => {
-            if (child.bitmap === sprite.bitmap) {
-                SceneManager._scene._spriteset.removeChild(child);
-            }
-        });
+      
+        if (sprites.glow) SceneManager._scene._spriteset.removeChild(sprites.glow);
+        if (sprites.shadow) SceneManager._scene._spriteset.removeChild(sprites.shadow);
+
+        $3DImages[imageId] = null;
+        $3DImageInfo[imageId] = null; 
 
         console.log("3D Image removed:", imageId);
     } else {
@@ -395,11 +391,12 @@ PluginManager.registerCommand('Simple3DImage', 'removeImage', args => {
 
 
 
-// Sobrescribir la función que maneja el cambio de escena
+
+
 var _Scene_Map_onMapLoaded = Scene_Map.prototype.onMapLoaded;
 Scene_Map.prototype.onMapLoaded = function() {
     _Scene_Map_onMapLoaded.call(this);
-    // Recrear las imágenes 3D en la nueva escena
+ 
     $3DImageInfo.forEach((args, imageId) => {
         if (args) {
             PluginManager.callCommand(this, 'Simple3DImage', 'show3DImage', args);
