@@ -246,7 +246,9 @@ PluginManager.registerCommand('Simple3DImage', 'show3DImage', args => {
     $3DImageInfo[imageId] = args;
 
     if ($3DImages[imageId]) {
-        SceneManager._scene._spriteset.removeChild($3DImages[imageId]);
+        SceneManager._scene._spriteset.removeChild($3DImages[imageId].main);
+        if ($3DImages[imageId].glow) SceneManager._scene._spriteset.removeChild($3DImages[imageId].glow);
+        if ($3DImages[imageId].shadow) SceneManager._scene._spriteset.removeChild($3DImages[imageId].shadow);
         $3DImages[imageId] = null;
     }
 
