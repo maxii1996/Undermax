@@ -375,21 +375,24 @@ PluginManager.registerCommand('Simple3DImage', 'removeImage', args => {
     const imageId = Number(args.imageId);
     const sprite = $3DImages[imageId];
     if (sprite) {
-        // Eliminar cualquier efecto de sombra o brillo asociado con la imagen
-        sprite.children.forEach(child => {
-            sprite.removeChild(child);
-        });
-
         // Eliminar la imagen principal
         SceneManager._scene._spriteset.removeChild(sprite);
         $3DImages[imageId] = null;
         $3DImageInfo[imageId] = null; // Eliminar también la información de la imagen
+
+        // Eliminar los efectos de resplandor y sombra
+        SceneManager._scene._spriteset.children.forEach(child => {
+            if (child.bitmap === sprite.bitmap) {
+                SceneManager._scene._spriteset.removeChild(child);
+            }
+        });
 
         console.log("3D Image removed:", imageId);
     } else {
         console.log("3D Image not found:", imageId);
     }
 });
+
 
 
 // Sobrescribir la función que maneja el cambio de escena
