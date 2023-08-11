@@ -23,6 +23,13 @@
  * @text Range End
  * @desc End of the special range in percentage. (0-100)
  * @default 60
+ * 
+ * @arg CoyoteTime
+ * @text Coyote Time (%)
+ * @type number
+ * @min 0
+ * @desc The tolerance percentage for success. A value of 2 would allow 2% before and after the range.
+ * @default 0
  *
  * @arg SuccessSwitchID
  * @type switch
@@ -162,13 +169,7 @@
  * @desc Size of the arrow in pixels.
  * @default 16
  *
- * @param CoyoteTime
- * @text Coyote Time (%)
- * @type number
- * @min 0
- * @desc The tolerance percentage for success. A value of 2 would allow 2% before and after the range.
- * @default 0
- * 
+
  *
  * @help
  * Use the plugin command "startBar" to start the mini-game.
@@ -221,16 +222,20 @@
         }
 
         checkArrowPosition() {
-            if (this.arrowPosition >= this.rangoStart && this.arrowPosition <= this.rangoEnd) {
+            const adjustedStart = this.rangoStart - this.coyoteTime;
+            const adjustedEnd = this.rangoEnd + this.coyoteTime;
+        
+            if (this.arrowPosition >= adjustedStart && this.arrowPosition <= adjustedEnd) {
                 $gameSwitches.setValue(this.successSwitchId, true);
                 $gameSwitches.setValue(this.failSwitchId, false);
             } else {
                 $gameSwitches.setValue(this.successSwitchId, false);
                 $gameSwitches.setValue(this.failSwitchId, true);
-
             }
             SceneManager._scene.endBarArrowGame();
         }
+        
+        
         
 
     }
