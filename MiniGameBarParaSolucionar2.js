@@ -236,6 +236,26 @@
  * @desc Color of the text in HEX format.
  * @default #FFFFFF
  * 
+* @arg DarkenScreen
+* @type boolean
+* @text Darken Screen
+* @desc Choose if you want to darken the screen during the minigame.
+* @default true
+
+* @arg ScreenDarknessOpacity
+* @type number
+* @min 0
+* @max 255
+* @text Screen Darkness Opacity
+* @desc Opacity of the screen darkening layer. (0-255)
+* @default 128
+
+* @arg ScreenDarknessColor
+* @type text
+* @text Screen Darkness Color
+* @desc Color of the screen darkening layer in HEX format.
+* @default #000000
+
  * 
  *
  * @help
@@ -394,6 +414,19 @@
 
         console.log("ShowWindowBackground value:", gameConfig.ShowWindowBackground);
 
+
+
+        if (gameConfig.DarkenScreen) {
+            this._darkenSprite = new PIXI.Graphics();
+            this._darkenSprite.beginFill(parseInt(gameConfig.ScreenDarknessColor.slice(1), 16), gameConfig.ScreenDarknessOpacity / 255);
+            this._darkenSprite.drawRect(0, 0, Graphics.width, Graphics.height);
+            this._darkenSprite.endFill();
+            this.addChild(this._darkenSprite);
+        }
+        
+
+
+
         // If it's "Automatic", adjust the X and Y positions
         if (gameConfig.positionMode === "Automatic") {
             const tileWidth = $gameMap.tileWidth();
@@ -504,6 +537,9 @@
 
     
     Scene_Map.prototype.endBarArrowGame = function() {
+
+
+
         this.removeChild(this._barSprite);
         this.removeChild(this._arrowSprite);
         // Eliminar sombreado
@@ -513,6 +549,12 @@
         if (this._arrowShadowSprite) {
             this.removeChild(this._arrowShadowSprite);
         }
+
+        if (this._darkenSprite) {
+            this.removeChild(this._darkenSprite);
+            this._darkenSprite = null;
+        }
+        
         
         
         console.log("Removing Custom Text");
