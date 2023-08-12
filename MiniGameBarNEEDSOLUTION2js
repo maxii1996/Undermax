@@ -317,6 +317,21 @@
         }
     };
 
+
+    class CustomTextWindow extends Window_Base {
+        constructor(rect, text) {
+            super(rect);
+            this._text = text;
+            this.refresh();
+        }
+
+        refresh() {
+            this.contents.clear();
+            this.drawText(this._text, 0, 0);
+        }
+    }
+
+
     Scene_Map.prototype.createBarArrowGame = function(gameConfig) {
         // If it's "Automatic", adjust the X and Y positions
         if (gameConfig.positionMode === "Automatic") {
@@ -327,18 +342,13 @@
         }
     
         if (gameConfig.customText && gameConfig.customText !== "") {
-            this._customTextSprite = new PIXI.Text(gameConfig.customText, {
-                fontSize: gameConfig.textSize,
-                fill: gameConfig.textColor
-            });
-            
-            if (this._customTextSprite) {
-                this._customTextSprite.x = gameConfig.barX + gameConfig.textOffsetX;
-                this._customTextSprite.y = gameConfig.barY - this._customTextSprite.height + gameConfig.textOffsetY;
-                this.addChild(this._customTextSprite);
-                console.log("Custom Text Created:", gameConfig.customText);
-                console.log("Text Position:", this._customTextSprite.x, this._customTextSprite.y);
-            }
+            const dummyWindow = new Window_Base(new Rectangle(0, 0, 0, 0));
+            const textWidth = dummyWindow.textWidth(gameConfig.customText) + dummyWindow.padding * 2;
+            const textHeight = dummyWindow.calcTextHeight({text: gameConfig.customText, index: 0}, false) + dummyWindow.padding * 2;
+            const x = gameConfig.barX + gameConfig.textOffsetX;
+            const y = gameConfig.barY - textHeight + gameConfig.textOffsetY;
+            this._customTextWindow = new CustomTextWindow(new Rectangle(x, y, textWidth, textHeight), gameConfig.customText);
+            this.addWindow(this._customTextWindow);
         } else {
             console.log("Custom Text not provided or empty.");
         }
@@ -435,12 +445,10 @@
 
         console.log("Removing Custom Text");
 
-     // Remove Custom Text
-if (this._customTextSprite) {
-    this.removeChild(this._customTextSprite);
-    this._customTextSprite = null;
-}
-
+        if (this._customTextWindow) {
+            this.removeWindow(this._customTextWindow);
+            this._customTextWindow = null;
+        }
 
         activeBarGame = null;
         $gameMap._interpreter.setWaitMode('');
