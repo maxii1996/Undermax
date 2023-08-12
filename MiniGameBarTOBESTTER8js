@@ -13,7 +13,7 @@
  * @min 0
  * @max 100
  * @text Range Start
- * @desc Start of the special range in percentage. (0-100)
+ * @desc Start of the success range in percentage. (0-100)
  * @default 40
  *
  * @arg RangoEnd
@@ -21,7 +21,7 @@
  * @min 0
  * @max 100
  * @text Range End
- * @desc End of the special range in percentage. (0-100)
+ * @desc End of the success range in percentage. (0-100) This must be Higher than Range Start.
  * @default 60
  * 
  * @arg CoyoteTime
@@ -46,7 +46,7 @@
  * @arg BarColors
  * @type text[]
  * @text Bar Colors
- * @desc Bar colors in HEX format. If more than one color is chosen, a gradient is created.
+ * @desc Bar colors in HEX format. If more than one color is chosen, a multicolor bar is created.
  * @default ["#FF0000"]
  *
  * @arg RangeColor
@@ -120,9 +120,6 @@
  * @option ↑
  * @option →
  * @option ↗
- * @option ⬆
- * @option ⬆
- * @option ⬆️
  * @option ^
  * @option ↥
  * @option ⇑
@@ -134,7 +131,6 @@
  * @option ⌤
  * @option ⮹
  * @option ⇡
- * @option ⇮
  * @option ⮉
  * @option ⮙
  * @option ⮝
@@ -146,7 +142,6 @@
  * @option ⮥
  * @option ⮴
  * @option ⮵
- * @option 🔼
  * @option 🠅
  * @option 🠉
  * @option 🠕
@@ -278,7 +273,8 @@
             this.textSize = Number(args.TextSize || 28);
             this.textColor = args.TextColor || "#FFFFFF";
             this.showWindowBackground = (args.ShowWindowBackground === 'true' || args.ShowWindowBackground === true);
-
+            this.AutoBarOffsetX = Number(args.AutoBarOffsetX || 0);
+            this.AutoBarOffsetY = Number(args.AutoBarOffsetY || 0);
            
             this.enableShadow = (args.EnableShadow === 'true' || args.EnableShadow === true);
 
@@ -400,12 +396,15 @@
         if (gameConfig.positionMode === "Automatic") {
             const tileWidth = $gameMap.tileWidth();
             const tileHeight = $gameMap.tileHeight();
+            
             console.log("Original Bar X:", gameConfig.barX);
             console.log("Original Bar Y:", gameConfig.barY);
             console.log("AutoBarOffsetX:", gameConfig.AutoBarOffsetX);
             console.log("AutoBarOffsetY:", gameConfig.AutoBarOffsetY);
+            
             gameConfig.barX = $gamePlayer.screenX() - gameConfig.barWidth / 2 + gameConfig.AutoBarOffsetX;
             gameConfig.barY = $gamePlayer.screenY() - tileHeight - gameConfig.barHeight + gameConfig.AutoBarOffsetY;
+            
             console.log("Adjusted Bar X:", gameConfig.barX);
             console.log("Adjusted Bar Y:", gameConfig.barY);
         }
