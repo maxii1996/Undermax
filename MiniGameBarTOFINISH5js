@@ -28,7 +28,7 @@
  * @text Coyote Time (%)
  * @type number
  * @min 0
- * @desc The tolerance percentage for success. It would allow before and after the range. (Recommended Value: 2)
+ * @desc The tolerance percentage for success. Allows a margin before and after the range. (Recommended Value: 2)
  * @default 2
  *
  * @arg SuccessSwitchID
@@ -60,7 +60,6 @@
  * @text Arrow Color
  * @desc Arrow color in HEX format.
  * @default #FFFFFF
- *
  * 
  * @arg BarX
  * @type number
@@ -91,7 +90,6 @@
  * @text Arrow Speed
  * @desc Speed at which the arrow moves.
  * @default 2
- *
  * 
  * @arg ArrowIcon
  * @type combo
@@ -155,43 +153,48 @@
  * @option ⥜
  * @option ⥔
  * 
- *
  * @arg ArrowSize
  * @type number
  * @text Arrow Size
- * @desc Size of the arrow in pixels.
- * @default 16
+ * @desc Size of the arrow icon.
+ * @default 20
  *
  * @arg EnableShadow
  * @type boolean
- * @text Habilitar Sombreado
- * @desc Habilita o deshabilita el sombreado.
+ * @text Enable Shadow
+ * @desc Enables or disables the shadow.
  * @default true
- * 
- * 
  *
  * @arg ShadowColor
  * @type text
- * @text Color del Sombreado
- * @desc Color del sombreado en formato HEX.
+ * @text Shadow Color
+ * @desc Shadow color in HEX format.
  * @default #000000
  *
  * @arg ShadowOffsetX
  * @type number
- * @text Posicion X del sombreado
- * @desc Offset en la posición X del sombreado.
+ * @text Shadow X Position
+ * @desc Offset in the X position of the shadow.
  * @default 2
  *
  * @arg ShadowOffsetY
  * @type number
- * @text Posicion Y del sombreado
- * @desc Offset en la posición Y del sombreado.
+ * @text Shadow Y Position
+ * @desc Offset in the Y position of the shadow.
  * @default 2
  *
+ * @arg PositionMode
+ * @type select
+ * @text Position Mode
+ * @desc Do you want the bar position to be automatic or manual?
+ * @default Manual
+ * @option Manual
+ * @option Automatic
  *
  * @help
  * Use the plugin command "startBar" to start the mini-game.
  */
+
 
 (() => {
     const BAR_LENGTH = 100;
@@ -218,6 +221,7 @@
             this.arrowPosition = 0;
             this.arrowDirection = 1; 
             this._canMove = false;
+            this.positionMode = args.PositionMode;
 
            
             this.enableShadow = (args.EnableShadow === 'true' || args.EnableShadow === true);
@@ -277,17 +281,22 @@
     };
 
     Scene_Map.prototype.createBarArrowGame = function(gameConfig) {
-        
+        // If it's "Automatic", adjust the X and Y positions
+        if (gameConfig.PositionMode === "Automatic") {
+            const tileWidth = $gameMap.tileWidth();
+            const tileHeight = $gameMap.tileHeight();
+            gameConfig.barX = $gamePlayer.screenX() - gameConfig.barWidth / 2;
+            gameConfig.barY = $gamePlayer.screenY() - tileHeight - gameConfig.barHeight;
+        }
+    
         this._barSprite = new PIXI.Graphics();
         this._arrowSprite = new PIXI.Text(gameConfig.arrowIcon, {
             fontSize: gameConfig.arrowSize,
             fill: gameConfig.arrowColor
         });
         this.addChild(this._barSprite);
-     
         this._barSprite.clear();
-
-
+    
         if (gameConfig.enableShadow) {
             this._barShadowSprite = new PIXI.Graphics();
             this._barShadowSprite.beginFill(parseInt(gameConfig.shadowColor.slice(1), 16));
@@ -300,11 +309,10 @@
                 this._barShadowSprite = null;
             }
         }
-
-
+    
         this._barSprite = new PIXI.Graphics();
         this.addChild(this._barSprite);
-
+    
         if (gameConfig.barColors.length > 1) {
             let stepWidth = gameConfig.barWidth / gameConfig.barColors.length;
             for (let i = 0; i < gameConfig.barColors.length; i++) {
@@ -317,7 +325,7 @@
             this._barSprite.drawRect(gameConfig.barX, gameConfig.barY, gameConfig.barWidth, gameConfig.barHeight);
             this._barSprite.endFill();
         }
-
+    
         const rangeStartX = gameConfig.barX + (gameConfig.barWidth * (gameConfig.rangoStart / 100));
         const rangeWidth = gameConfig.barWidth * ((gameConfig.rangoEnd - gameConfig.rangoStart) / 100);
         this._barSprite.beginFill(parseInt(gameConfig.rangeColor.slice(1), 16));
@@ -331,16 +339,14 @@
             });
             this.addChild(this._arrowShadowSprite);
         }
-
+    
         this._arrowSprite = new PIXI.Text(gameConfig.arrowIcon, {
             fontSize: gameConfig.arrowSize,
             fill: gameConfig.arrowColor
         });
         this.addChild(this._arrowSprite);
-    
-        
-  
     };
+    
 
     Scene_Map.prototype.drawArrow = function(gameConfig) {
         if (!this._arrowSprite) return;
