@@ -61,12 +61,6 @@
  * @desc Arrow color in HEX format.
  * @default #FFFFFF
  *
- * @arg SetManualPosition
- * @type boolean
- * @text Set Manual Position
- * @desc If true, it uses the X, Y position set in the parameters. If false, the bar's position will be above the main character's head.
- * @default true
- *  
  * 
  * @arg BarX
  * @type number
@@ -205,7 +199,7 @@
 
     class MiniGameBar {
         constructor(args) {
-            console.log("Inicializando MiniGameBar con argumentos:", args);
+          
             this.rangoStart = Number(args.RangoStart);
             this.rangoEnd = Number(args.RangoEnd);
             this.coyoteTime = Number(args.CoyoteTime);
@@ -222,10 +216,10 @@
             this.arrowIcon = args.ArrowIcon;
             this.arrowSize = Number(args.ArrowSize);
             this.arrowPosition = 0;
-            this.arrowDirection = 1; // 1: derecha, -1: izquierda
+            this.arrowDirection = 1; 
             this._canMove = false;
 
-            // Propiedades del sombreado
+           
             this.enableShadow = args.EnableShadow;
             this.shadowColor = args.ShadowColor;
             this.shadowOffsetX = Number(args.ShadowOffsetX);
@@ -249,10 +243,7 @@
             const adjustedStart = this.rangoStart - this.coyoteTime;
             const adjustedEnd = this.rangoEnd + this.coyoteTime;
 
-            console.log("Arrow Position:", this.arrowPosition);
-            console.log("Adjusted Start:", adjustedStart);
-            console.log("Adjusted End:", adjustedEnd);
-
+        
             if (this.arrowPosition >= adjustedStart && this.arrowPosition <= adjustedEnd) {
                 $gameSwitches.setValue(this.successSwitchId, true);
                 $gameSwitches.setValue(this.failSwitchId, false);
@@ -285,7 +276,7 @@
     };
 
     Scene_Map.prototype.createBarArrowGame = function(gameConfig) {
-        console.log("Creando juego de barra y flecha con configuración:", gameConfig);
+        
         this._barSprite = new PIXI.Graphics();
         this._arrowSprite = new PIXI.Text(gameConfig.arrowIcon, {
             fontSize: gameConfig.arrowSize,
@@ -295,7 +286,7 @@
      
         this._barSprite.clear();
 
-        // Sombreado para la barra
+
         if (gameConfig.enableShadow) {
             this._barShadowSprite = new PIXI.Graphics();
             this._barShadowSprite.beginFill(parseInt(gameConfig.shadowColor.slice(1), 16));
@@ -354,7 +345,7 @@
             this._arrowShadowSprite.x = arrowX + gameConfig.shadowOffsetX;
             this._arrowShadowSprite.y = gameConfig.barY + gameConfig.barHeight + gameConfig.shadowOffsetY;
         } else if (this._arrowShadowSprite) {
-            this._arrowShadowSprite.visible = false; // Ocultar el sombreado si no está habilitado
+            this._arrowShadowSprite.visible = false; 
         }
     };
 
