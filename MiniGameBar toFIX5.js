@@ -302,7 +302,6 @@
             this._barShadowSprite.endFill();
             this.addChild(this._barShadowSprite);
         }
-
         this._barSprite = new PIXI.Graphics();
         this.addChild(this._barSprite);
 
@@ -347,14 +346,17 @@
         const arrowX = gameConfig.barX + (gameConfig.barWidth * (gameConfig.arrowPosition / 100));
         this._arrowSprite.x = arrowX;
         this._arrowSprite.y = gameConfig.barY + gameConfig.barHeight;
-
+        
         // Dibujar sombreado de la flecha
         if (gameConfig.enableShadow && this._arrowShadowSprite) {
             this._arrowShadowSprite.x = arrowX + gameConfig.shadowOffsetX;
             this._arrowShadowSprite.y = gameConfig.barY + gameConfig.barHeight + gameConfig.shadowOffsetY;
+        } else if (this._arrowShadowSprite) {
+            this._arrowShadowSprite.visible = false; // Ocultar el sombreado si no está habilitado
         }
     };
 
+    
     Scene_Map.prototype.endBarArrowGame = function() {
         this.removeChild(this._barSprite);
         this.removeChild(this._arrowSprite);
