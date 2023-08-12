@@ -204,6 +204,7 @@
  * @text Show Window Background
  * @desc Choose if you want to display the window background or not.
  * @default true
+ * 
 
  * @arg TextOffsetX
  * @type number
@@ -331,22 +332,23 @@
             this._showBackground = showBackground;
             this.refresh();
         }
-    
+
         refresh() {
             this.contents.clear();
             this.drawText(this._text, 0, 0);
         }
-    
+
         updateBackOpacity() {
             this.backOpacity = this._showBackground ? 255 : 0;
         }
-    
+
         _refreshFrame() {
             if (this._showBackground) {
                 super._refreshFrame();
             }
         }
     }
+
     
 
 
@@ -365,12 +367,11 @@
             const textHeight = dummyWindow.calcTextHeight({text: gameConfig.customText, index: 0}, false) + dummyWindow.padding * 2;
             const x = gameConfig.barX + gameConfig.textOffsetX;
             const y = gameConfig.barY - textHeight + gameConfig.textOffsetY;
-            this._customTextWindow = new CustomTextWindow(new Rectangle(x, y, textWidth, textHeight), gameConfig.customText);
+            this._customTextWindow = new CustomTextWindow(new Rectangle(x, y, textWidth, textHeight), gameConfig.customText, gameConfig.ShowWindowBackground);
             this.addWindow(this._customTextWindow);
         } else {
             console.log("Custom Text not provided or empty.");
         }
-
     
         this._barSprite = new PIXI.Graphics();
         this._arrowSprite = new PIXI.Text(gameConfig.arrowIcon, {
