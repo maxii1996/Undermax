@@ -28,8 +28,8 @@
  * @text Coyote Time (%)
  * @type number
  * @min 0
- * @desc The tolerance percentage for success. A value of 2 would allow 2% before and after the range.
- * @default 0
+ * @desc The tolerance percentage for success. It would allow before and after the range. (Recommended Value: 2)
+ * @default 2
  *
  * @arg SuccessSwitchID
  * @type switch
@@ -187,6 +187,7 @@
             console.log("Inicializando MiniGameBar con argumentos:", args);
             this.rangoStart = Number(args.RangoStart);
             this.rangoEnd = Number(args.RangoEnd);
+            this.coyoteTime = Number(args.CoyoteTime);
             this.successSwitchId = Number(args.SuccessSwitchID);
             this.failSwitchId = Number(args.FailSwitchID);
             this.barColors = JSON.parse(args.BarColors);
@@ -224,6 +225,10 @@
         checkArrowPosition() {
             const adjustedStart = this.rangoStart - this.coyoteTime;
             const adjustedEnd = this.rangoEnd + this.coyoteTime;
+        
+            console.log("Arrow Position:", this.arrowPosition);
+            console.log("Adjusted Start:", adjustedStart);
+            console.log("Adjusted End:", adjustedEnd);
         
             if (this.arrowPosition >= adjustedStart && this.arrowPosition <= adjustedEnd) {
                 $gameSwitches.setValue(this.successSwitchId, true);
