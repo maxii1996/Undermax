@@ -351,10 +351,19 @@
         }
     
         _refreshFrame() {
-            if (this._showBackground) {
-                super._refreshFrame();
+            super._refreshFrame();
+            if (this._windowFrameSprite && !this._showBackground) {
+                this._windowFrameSprite.visible = false;
             }
         }
+
+        hideWindow() {
+            this.hide();
+            this.contents.clear();
+        }
+        
+        
+        
     }
     
     
@@ -473,12 +482,16 @@
         if (this._arrowShadowSprite) {
             this.removeChild(this._arrowShadowSprite);
         }
+        
+        
         console.log("Removing Custom Text");
         if (this._customTextWindow) {
-            this._customTextWindow.contents.clear(); // Limpia el contenido de la ventana
-            this.removeChild(this._customTextWindow); // Usa removeChild en lugar de removeWindow
+            this._customTextWindow.hideWindow(); // Oculta la ventana y limpia su contenido
+            this.removeChild(this._customTextWindow);
             this._customTextWindow = null;
         }
+
+
         activeBarGame = null;
         $gameMap._interpreter.setWaitMode('');
     };
