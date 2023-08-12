@@ -61,6 +61,15 @@
  * @desc Arrow color in HEX format.
  * @default #FFFFFF
  * 
+ * 
+ * @arg PositionMode
+ * @type select
+ * @text Position Mode
+ * @desc Do you want the bar position to be automatic or manual?
+ * @default Manual
+ * @option Manual
+ * @option Automatic
+ * 
  * @arg BarX
  * @type number
  * @text Bar X Position
@@ -183,13 +192,6 @@
  * @desc Offset in the Y position of the shadow.
  * @default 2
  *
- * @arg PositionMode
- * @type select
- * @text Position Mode
- * @desc Do you want the bar position to be automatic or manual?
- * @default Manual
- * @option Manual
- * @option Automatic
  *
  * @help
  * Use the plugin command "startBar" to start the mini-game.
@@ -282,7 +284,7 @@
 
     Scene_Map.prototype.createBarArrowGame = function(gameConfig) {
         // If it's "Automatic", adjust the X and Y positions
-        if (gameConfig.PositionMode === "Automatic") {
+        if (gameConfig.positionMode === "Automatic") {
             const tileWidth = $gameMap.tileWidth();
             const tileHeight = $gameMap.tileHeight();
             gameConfig.barX = $gamePlayer.screenX() - gameConfig.barWidth / 2;
