@@ -220,7 +220,8 @@
             this._canMove = false;
 
            
-            this.enableShadow = args.EnableShadow;
+            this.enableShadow = (args.EnableShadow === 'true' || args.EnableShadow === true);
+
             this.shadowColor = args.ShadowColor;
             this.shadowOffsetX = Number(args.ShadowOffsetX);
             this.shadowOffsetY = Number(args.ShadowOffsetY);
