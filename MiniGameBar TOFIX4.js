@@ -190,6 +190,19 @@
  * @desc Size of the shadow in pixels.
  * @default 5
  *
+* @arg ShadowOffsetX
+* @type number
+* @text Shadow X Offset
+* @desc X offset of the shadow in pixels.
+* @default 5
+
+* @arg ShadowOffsetY
+* @type number
+* @text Shadow Y Offset
+* @desc Y offset of the shadow in pixels.
+* @default 5
+
+ * 
  * @help
  * Use the plugin command "startBar" to start the mini-game.
  */
@@ -301,18 +314,42 @@ Scene_Map.prototype.update = function() {
     
     Scene_Map.prototype.createBarArrowGame = function(gameConfig) {
         console.log("Creando juego de barra y flecha con configuración:", gameConfig);
-
+    
+        // Crear sombras
+        this._barShadowSprite = new PIXI.Graphics();
+        this._arrowShadowSprite = new PIXI.Text(gameConfig.arrowIcon, {
+            fontSize: gameConfig.arrowSize,
+            fill: gameConfig.shadowColor
+        });
+        this.addChild(this._barShadowSprite);
+        this.addChild(this._arrowShadowSprite);
+    
+        // Posicionar sombras con el desplazamiento personalizado
+        this._barShadowSprite.position.set(gameConfig.barX + gameConfig.ShadowOffsetX, gameConfig.barY + gameConfig.ShadowOffsetY);
+        this._arrowShadowSprite.position.set(gameConfig.barX + gameConfig.ShadowOffsetX, gameConfig.barY + gameConfig.barHeight + gameConfig.ShadowOffsetY);
+    
+        // Dibujar sombras
+        this._barShadowSprite.clear();
+        this._barShadowSprite.beginFill(parseInt(gameConfig.shadowColor.slice(1), 16));
+        this._barShadowSprite.drawRect(gameConfig.barX, gameConfig.barY, gameConfig.barWidth, gameConfig.barHeight);
+        this._barShadowSprite.endFill();
+    
+        const rangeStartXShadow = gameConfig.barX + (gameConfig.barWidth * (gameConfig.rangoStart / 100));
+        const rangeWidthShadow = gameConfig.barWidth * ((gameConfig.rangoEnd - gameConfig.rangoStart) / 100);
+        this._barShadowSprite.beginFill(parseInt(gameConfig.shadowColor.slice(1), 16));
+        this._barShadowSprite.drawRect(rangeStartXShadow, gameConfig.barY, rangeWidthShadow, gameConfig.barHeight);
+        this._barShadowSprite.endFill();
+    
+        // Resto del código original para crear la barra y la flecha
         this._barSprite = new PIXI.Graphics();
         this._arrowSprite = new PIXI.Text(gameConfig.arrowIcon, {
             fontSize: gameConfig.arrowSize,
             fill: gameConfig.arrowColor
         });
-
         this.addChild(this._barSprite);
         this.addChild(this._arrowSprite);
-
         this._barSprite.clear();
-
+    
         if (gameConfig.barColors.length > 1) {
             let stepWidth = gameConfig.barWidth / gameConfig.barColors.length;
             for (let i = 0; i < gameConfig.barColors.length; i++) {
@@ -325,25 +362,30 @@ Scene_Map.prototype.update = function() {
             this._barSprite.drawRect(gameConfig.barX, gameConfig.barY, gameConfig.barWidth, gameConfig.barHeight);
             this._barSprite.endFill();
         }
-
+    
         const rangeStartX = gameConfig.barX + (gameConfig.barWidth * (gameConfig.rangoStart / 100));
         const rangeWidth = gameConfig.barWidth * ((gameConfig.rangoEnd - gameConfig.rangoStart) / 100);
-
         this._barSprite.beginFill(parseInt(gameConfig.rangeColor.slice(1), 16));
         this._barSprite.drawRect(rangeStartX, gameConfig.barY, rangeWidth, gameConfig.barHeight);
         this._barSprite.endFill();
     };
-
+    
     Scene_Map.prototype.drawArrow = function(gameConfig) {
-        if (!this._arrowSprite) return;
+        if (!this._arrowSprite || !this._arrowShadowSprite) return;
         const arrowX = gameConfig.barX + (gameConfig.barWidth * (gameConfig.arrowPosition / 100));
         this._arrowSprite.x = arrowX;
         this._arrowSprite.y = gameConfig.barY + gameConfig.barHeight;
+    
+        // Posicionar sombra de la flecha con el desplazamiento personalizado
+        this._arrowShadowSprite.x = arrowX + gameConfig.ShadowOffsetX;
+        this._arrowShadowSprite.y = gameConfig.barY + gameConfig.barHeight + gameConfig.ShadowOffsetY;
     };
-
+    
     Scene_Map.prototype.endBarArrowGame = function() {
         this.removeChild(this._barSprite);
         this.removeChild(this._arrowSprite);
+        this.removeChild(this._barShadowSprite); // Eliminar sombra de la barra
+        this.removeChild(this._arrowShadowSprite); // Eliminar sombra de la flecha
         activeBarGame = null;
         $gameMap._interpreter.setWaitMode('');
     };
