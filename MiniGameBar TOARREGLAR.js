@@ -61,6 +61,13 @@
  * @desc Arrow color in HEX format.
  * @default #FFFFFF
  *
+ * @arg SetManualPosition
+ * @type boolean
+ * @text Set Manual Position
+ * @desc If true, it uses the X, Y position set in the parameters. If false, the bar's position will be above the main character's head.
+ * @default true
+ *  
+ * 
  * @arg BarX
  * @type number
  * @text Bar X Position
@@ -92,7 +99,7 @@
  * @default 2
  *
  * 
-@arg ArrowIcon
+ * @arg ArrowIcon
  * @type combo
  * @text Arrow Icon
  * @desc Unicode character for the arrow icon.
@@ -101,7 +108,6 @@
  * @option →
  * @option ↗
  * @option ⬆
-↑
  * @option ⬆
  * @option ⬆️
  * @option ^
@@ -154,14 +160,7 @@
  * @option ⥣
  * @option ⥜
  * @option ⥔
- * @type combo
- * @text Arrow Icon
- * @desc Unicode character for the arrow icon.
- * @default ↑
- * @option ↑
- * @option →
- * @option ↗
- * @option ⬆
+ * 
  *
  * @arg ArrowSize
  * @type number
@@ -174,6 +173,8 @@
  * @text Habilitar Sombreado
  * @desc Habilita o deshabilita el sombreado.
  * @default true
+ * 
+ * 
  *
  * @arg ShadowColor
  * @type text
@@ -338,6 +339,7 @@
         });
         this.addChild(this._arrowSprite);
     
+        
   
     };
 
