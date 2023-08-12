@@ -169,7 +169,26 @@
  * @desc Size of the arrow in pixels.
  * @default 16
  *
+ * @arg ShadowEnabled
+ * @text Shadow Enabled
+ * @type combo
+ * @option Enabled
+ * @option Disabled
+ * @default Enabled
+ * @desc Enable or disable the shadow effect.
 
+ * @arg ShadowColor
+ * @text Shadow Color
+ * @type text
+ * @desc Color of the shadow in HEX format.
+ * @default #000000
+
+ * @arg ShadowSize
+ * @text Shadow Size
+ * @type number
+ * @min 0
+ * @desc Size of the shadow in pixels.
+ * @default 5
  *
  * @help
  * Use the plugin command "startBar" to start the mini-game.
@@ -190,6 +209,9 @@
             this.coyoteTime = Number(args.CoyoteTime);
             this.successSwitchId = Number(args.SuccessSwitchID);
             this.failSwitchId = Number(args.FailSwitchID);
+            this.shadowEnabled = args.ShadowEnabled === "Enabled";
+            this.shadowColor = args.ShadowColor;
+            this.shadowSize = Number(args.ShadowSize);
             this.barColors = JSON.parse(args.BarColors);
             this.rangeColor = args.RangeColor;
             this.arrowColor = args.ArrowColor;
@@ -276,6 +298,7 @@ Scene_Map.prototype.update = function() {
         }
     };
 
+    
     Scene_Map.prototype.createBarArrowGame = function(gameConfig) {
         console.log("Creando juego de barra y flecha con configuración:", gameConfig);
 
