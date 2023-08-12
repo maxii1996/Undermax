@@ -81,6 +81,18 @@
  * @text Bar Y Position
  * @desc Y position of the bar.
  * @default 100
+ * 
+ * @arg AutoBarOffsetX
+ * @type number
+ * @text Automatic Bar Offset X
+ * @desc Offset in the X position of the bar when in Automatic mode.
+ * @default 0
+ * 
+ * @arg AutoBarOffsetY
+ * @type number
+ * @text Automatic Bar Offset Y
+ * @desc Offset in the Y position of the bar when in Automatic mode.
+ * @default 0
  *
  * @arg BarWidth
  * @type number
@@ -388,8 +400,14 @@
         if (gameConfig.positionMode === "Automatic") {
             const tileWidth = $gameMap.tileWidth();
             const tileHeight = $gameMap.tileHeight();
-            gameConfig.barX = $gamePlayer.screenX() - gameConfig.barWidth / 2;
-            gameConfig.barY = $gamePlayer.screenY() - tileHeight - gameConfig.barHeight;
+            console.log("Original Bar X:", gameConfig.barX);
+            console.log("Original Bar Y:", gameConfig.barY);
+            console.log("AutoBarOffsetX:", gameConfig.AutoBarOffsetX);
+            console.log("AutoBarOffsetY:", gameConfig.AutoBarOffsetY);
+            gameConfig.barX = $gamePlayer.screenX() - gameConfig.barWidth / 2 + gameConfig.AutoBarOffsetX;
+            gameConfig.barY = $gamePlayer.screenY() - tileHeight - gameConfig.barHeight + gameConfig.AutoBarOffsetY;
+            console.log("Adjusted Bar X:", gameConfig.barX);
+            console.log("Adjusted Bar Y:", gameConfig.barY);
         }
     
         if (gameConfig.customText && gameConfig.customText !== "") {
