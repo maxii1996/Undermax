@@ -265,7 +265,8 @@
             this.textOffsetY = Number(args.TextOffsetY || 0);
             this.textSize = Number(args.TextSize || 28);
             this.textColor = args.TextColor || "#FFFFFF";
-            
+            this.showWindowBackground = (args.ShowWindowBackground === 'true' || args.ShowWindowBackground === true);
+
            
             this.enableShadow = (args.EnableShadow === 'true' || args.EnableShadow === true);
 
@@ -377,7 +378,8 @@
             const textHeight = dummyWindow.calcTextHeight({text: gameConfig.customText, index: 0}, false) + dummyWindow.padding * 2;
             const x = gameConfig.barX + gameConfig.textOffsetX;
             const y = gameConfig.barY - textHeight + gameConfig.textOffsetY;
-            this._customTextWindow = new CustomTextWindow(new Rectangle(x, y, textWidth, textHeight), gameConfig.customText, gameConfig.ShowWindowBackground === 'true');
+    
+            this._customTextWindow = new CustomTextWindow(new Rectangle(x, y, textWidth, textHeight), gameConfig.customText, gameConfig.showWindowBackground);
             this.addWindow(this._customTextWindow);
         } else {
             console.log("Custom Text not provided or empty.");
