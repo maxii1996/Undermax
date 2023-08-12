@@ -291,7 +291,7 @@
             fill: gameConfig.arrowColor
         });
         this.addChild(this._barSprite);
-        this.addChild(this._arrowSprite);
+     
         this._barSprite.clear();
 
         // Sombreado para la barra
