@@ -318,10 +318,6 @@
     };
 
     Scene_Map.prototype.createBarArrowGame = function(gameConfig) {
-
-        console.log("Custom Text Created:", gameConfig.customText);
-console.log("Text Position:", this._customTextSprite.x, this._customTextSprite.y);
-
         // If it's "Automatic", adjust the X and Y positions
         if (gameConfig.positionMode === "Automatic") {
             const tileWidth = $gameMap.tileWidth();
@@ -329,14 +325,13 @@ console.log("Text Position:", this._customTextSprite.x, this._customTextSprite.y
             gameConfig.barX = $gamePlayer.screenX() - gameConfig.barWidth / 2;
             gameConfig.barY = $gamePlayer.screenY() - tileHeight - gameConfig.barHeight;
         }
-
+    
         if (gameConfig.customText && gameConfig.customText !== "") {
             this._customTextSprite = new PIXI.Text(gameConfig.customText, {
                 fontSize: gameConfig.textSize,
                 fill: gameConfig.textColor
             });
             
-            // Asegúrate de que el sprite se ha creado antes de intentar acceder a sus propiedades
             if (this._customTextSprite) {
                 this._customTextSprite.x = gameConfig.barX + gameConfig.textOffsetX;
                 this._customTextSprite.y = gameConfig.barY - this._customTextSprite.height + gameConfig.textOffsetY;
