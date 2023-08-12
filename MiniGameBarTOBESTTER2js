@@ -327,14 +327,22 @@
     class CustomTextWindow extends Window_Base {
         constructor(rect, text, showBackground) {
             super(rect);
-            this._text = text;
+            this._text = this.parseVariables(text);
             this._showBackground = showBackground;
+            console.log("CustomTextWindow _showBackground value:", this._showBackground);
+            this.updateBackOpacity();
             this.refresh();
         }
     
         refresh() {
             this.contents.clear();
             this.drawText(this._text, 0, 0);
+        }
+    
+        parseVariables(text) {
+            return text.replace(/\\v\[(\d+)\]/g, (_, variableId) => {
+                return $gameVariables.value(Number(variableId));
+            });
         }
     
         updateBackOpacity() {
@@ -348,9 +356,13 @@
         }
     }
     
+    
 
 
     Scene_Map.prototype.createBarArrowGame = function(gameConfig) {
+
+        console.log("ShowWindowBackground value:", gameConfig.ShowWindowBackground);
+
         // If it's "Automatic", adjust the X and Y positions
         if (gameConfig.positionMode === "Automatic") {
             const tileWidth = $gameMap.tileWidth();
@@ -365,7 +377,7 @@
             const textHeight = dummyWindow.calcTextHeight({text: gameConfig.customText, index: 0}, false) + dummyWindow.padding * 2;
             const x = gameConfig.barX + gameConfig.textOffsetX;
             const y = gameConfig.barY - textHeight + gameConfig.textOffsetY;
-            this._customTextWindow = new CustomTextWindow(new Rectangle(x, y, textWidth, textHeight), gameConfig.customText);
+            this._customTextWindow = new CustomTextWindow(new Rectangle(x, y, textWidth, textHeight), gameConfig.customText, gameConfig.ShowWindowBackground === 'true');
             this.addWindow(this._customTextWindow);
         } else {
             console.log("Custom Text not provided or empty.");
