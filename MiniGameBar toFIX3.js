@@ -300,7 +300,7 @@
             this._barShadowSprite.beginFill(parseInt(gameConfig.shadowColor.slice(1), 16));
             this._barShadowSprite.drawRect(gameConfig.barX + gameConfig.shadowOffsetX, gameConfig.barY + gameConfig.shadowOffsetY, gameConfig.barWidth, gameConfig.barHeight);
             this._barShadowSprite.endFill();
-            this.addChildAt(this._barShadowSprite, 0); // Asegurarse de que el sombreado esté detrás
+            this.addChild(this._barShadowSprite);
         }
 
         if (gameConfig.barColors.length > 1) {
@@ -322,14 +322,23 @@
         this._barSprite.drawRect(rangeStartX, gameConfig.barY, rangeWidth, gameConfig.barHeight);
         this._barSprite.endFill();
 
-        // Sombreado para la flecha
         if (gameConfig.enableShadow) {
             this._arrowShadowSprite = new PIXI.Text(gameConfig.arrowIcon, {
                 fontSize: gameConfig.arrowSize,
                 fill: gameConfig.shadowColor
             });
-            this.addChildAt(this._arrowShadowSprite, 1); // Asegurarse de que el sombreado esté detrás
+            this._arrowShadowSprite.x = gameConfig.barX + gameConfig.shadowOffsetX;
+            this._arrowShadowSprite.y = gameConfig.barY + gameConfig.barHeight + gameConfig.shadowOffsetY;
+            this.addChild(this._arrowShadowSprite);
         }
+    
+        this._arrowSprite = new PIXI.Text(gameConfig.arrowIcon, {
+            fontSize: gameConfig.arrowSize,
+            fill: gameConfig.arrowColor
+        });
+        this.addChild(this._arrowSprite);
+    
+        // ... (resto del código de creación de la barra)
     };
 
     Scene_Map.prototype.drawArrow = function(gameConfig) {
