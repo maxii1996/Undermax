@@ -203,7 +203,7 @@
  * @type boolean
  * @text Show Window Background
  * @desc Choose if you want to display the window background or not.
- * @default true
+ * @default false
 
  * @arg TextOffsetX
  * @type number
@@ -326,25 +326,26 @@
 
 
     class CustomTextWindow extends Window_Base {
-        constructor(rect, text, showBackground) {
+        constructor(rect, text, showBackground, textColor, textSize) {
             super(rect);
             this._text = this.parseVariables(text);
             this._showBackground = showBackground;
-            console.log("CustomTextWindow _showBackground value:", this._showBackground);
+            this._textColor = textColor;
+            this._textSize = textSize;
             this.updateBackOpacity();
             this.refresh();
         }
-    
+
         refresh() {
             this.contents.clear();
+            this.changeTextColor(this._textColor);
+            this.contents.fontSize = this._textSize;
             const textWidth = this.textWidth(this._text);
             const textHeight = this.calcTextHeight({text: this._text, index: 0}, false);
-            const x = (this.contentsWidth() - textWidth) / 2; // Calcula la posición X para centrar el texto
-            const y = (this.contentsHeight() - textHeight) / 2; // Calcula la posición Y para centrar el texto
+            const x = (this.contentsWidth() - textWidth) / 2;
+            const y = (this.contentsHeight() - textHeight) / 2;
             this.drawText(this._text, x, y);
         }
-        
-        
     
         parseVariables(text) {
             return text.replace(/\\v\[(\d+)\]/g, (_, variableId) => {
@@ -393,12 +394,13 @@
     
         if (gameConfig.customText && gameConfig.customText !== "") {
             const dummyWindow = new Window_Base(new Rectangle(0, 0, 0, 0));
+            dummyWindow.contents.fontSize = gameConfig.textSize;
             const textWidth = dummyWindow.textWidth(gameConfig.customText) + dummyWindow.padding * 2;
             const textHeight = dummyWindow.calcTextHeight({text: gameConfig.customText, index: 0}, false) + dummyWindow.padding * 2;
             const x = gameConfig.barX + gameConfig.textOffsetX;
             const y = gameConfig.barY - textHeight + gameConfig.textOffsetY;
-    
-            this._customTextWindow = new CustomTextWindow(new Rectangle(x, y, textWidth, textHeight), gameConfig.customText, gameConfig.showWindowBackground);
+
+            this._customTextWindow = new CustomTextWindow(new Rectangle(x, y, textWidth, textHeight), gameConfig.customText, gameConfig.showWindowBackground, gameConfig.textColor, gameConfig.textSize);
             this.addWindow(this._customTextWindow);
         } else {
             console.log("Custom Text not provided or empty.");
