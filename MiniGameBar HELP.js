@@ -321,8 +321,6 @@ Scene_Map.prototype.update = function() {
             fontSize: gameConfig.arrowSize,
             fill: gameConfig.shadowColor
         });
-        this.addChild(this._barShadowSprite);
-        this.addChild(this._arrowShadowSprite);
     
         // Posicionar sombras con el desplazamiento personalizado
         this._barShadowSprite.position.set(gameConfig.barX + gameConfig.ShadowOffsetX, gameConfig.barY + gameConfig.ShadowOffsetY);
@@ -331,14 +329,18 @@ Scene_Map.prototype.update = function() {
         // Dibujar sombras
         this._barShadowSprite.clear();
         this._barShadowSprite.beginFill(parseInt(gameConfig.shadowColor.slice(1), 16));
-        this._barShadowSprite.drawRect(gameConfig.barX, gameConfig.barY, gameConfig.barWidth, gameConfig.barHeight);
+        this._barShadowSprite.drawRect(0, 0, gameConfig.barWidth, gameConfig.barHeight);
         this._barShadowSprite.endFill();
     
-        const rangeStartXShadow = gameConfig.barX + (gameConfig.barWidth * (gameConfig.rangoStart / 100));
+        const rangeStartXShadow = gameConfig.barWidth * (gameConfig.rangoStart / 100);
         const rangeWidthShadow = gameConfig.barWidth * ((gameConfig.rangoEnd - gameConfig.rangoStart) / 100);
         this._barShadowSprite.beginFill(parseInt(gameConfig.shadowColor.slice(1), 16));
-        this._barShadowSprite.drawRect(rangeStartXShadow, gameConfig.barY, rangeWidthShadow, gameConfig.barHeight);
+        this._barShadowSprite.drawRect(rangeStartXShadow, 0, rangeWidthShadow, gameConfig.barHeight);
         this._barShadowSprite.endFill();
+    
+        // Añadir sombras al escenario
+        this.addChild(this._barShadowSprite);
+        this.addChild(this._arrowShadowSprite);
     
         // Resto del código original para crear la barra y la flecha
         this._barSprite = new PIXI.Graphics();
