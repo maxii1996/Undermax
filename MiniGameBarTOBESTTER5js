@@ -337,8 +337,14 @@
     
         refresh() {
             this.contents.clear();
-            this.drawText(this._text, 0, 0);
+            const textWidth = this.textWidth(this._text);
+            const textHeight = this.calcTextHeight({text: this._text, index: 0}, false);
+            const x = (this.contentsWidth() - textWidth) / 2; // Calcula la posición X para centrar el texto
+            const y = (this.contentsHeight() - textHeight) / 2; // Calcula la posición Y para centrar el texto
+            this.drawText(this._text, x, y);
         }
+        
+        
     
         parseVariables(text) {
             return text.replace(/\\v\[(\d+)\]/g, (_, variableId) => {
@@ -351,11 +357,15 @@
         }
     
         _refreshFrame() {
-            super._refreshFrame();
-            if (this._windowFrameSprite && !this._showBackground) {
-                this._windowFrameSprite.visible = false;
+            if (this._showBackground) {
+                super._refreshFrame();
+            } else {
+                if (this._windowFrameSprite) {
+                    this._windowFrameSprite.visible = false;
+                }
             }
         }
+        
 
         hideWindow() {
             this.hide();
@@ -488,6 +498,7 @@
         if (this._customTextWindow) {
             this._customTextWindow.hideWindow(); // Oculta la ventana y limpia su contenido
             this.removeChild(this._customTextWindow);
+            this._customTextWindow.destroy(); // Destruye la ventana y libera sus recursos
             this._customTextWindow = null;
         }
 
