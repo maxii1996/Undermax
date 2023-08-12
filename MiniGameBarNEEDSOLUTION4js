@@ -347,7 +347,7 @@
             }
         }
     }
-
+    
 
 
     Scene_Map.prototype.createBarArrowGame = function(gameConfig) {
@@ -365,9 +365,8 @@
             const textHeight = dummyWindow.calcTextHeight({text: gameConfig.customText, index: 0}, false) + dummyWindow.padding * 2;
             const x = gameConfig.barX + gameConfig.textOffsetX;
             const y = gameConfig.barY - textHeight + gameConfig.textOffsetY;
-const showBackground = PluginManager.parameters('MiniGameBar')["ShowWindowBackground"].toLowerCase() === "true";
-  this._customTextWindow = new CustomTextWindow(new Rectangle(x, y, width, height), customText, showBackground);           
-  this.addWindow(this._customTextWindow);
+            this._customTextWindow = new CustomTextWindow(new Rectangle(x, y, textWidth, textHeight), gameConfig.customText);
+            this.addWindow(this._customTextWindow);
         } else {
             console.log("Custom Text not provided or empty.");
         }
