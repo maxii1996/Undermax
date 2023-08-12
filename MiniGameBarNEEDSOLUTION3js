@@ -198,6 +198,12 @@
  * @text Custom Text
  * @desc Text that will appear during the minigame.
  * @default 
+ * 
+ * @arg ShowWindowBackground
+ * @type boolean
+ * @text Show Window Background
+ * @desc Choose if you want to display the window background or not.
+ * @default true
 
  * @arg TextOffsetX
  * @type number
@@ -319,17 +325,29 @@
 
 
     class CustomTextWindow extends Window_Base {
-        constructor(rect, text) {
+        constructor(rect, text, showBackground) {
             super(rect);
             this._text = text;
+            this._showBackground = showBackground;
             this.refresh();
         }
-
+    
         refresh() {
             this.contents.clear();
             this.drawText(this._text, 0, 0);
         }
+    
+        updateBackOpacity() {
+            this.backOpacity = this._showBackground ? 255 : 0;
+        }
+    
+        _refreshFrame() {
+            if (this._showBackground) {
+                super._refreshFrame();
+            }
+        }
     }
+
 
 
     Scene_Map.prototype.createBarArrowGame = function(gameConfig) {
@@ -347,8 +365,9 @@
             const textHeight = dummyWindow.calcTextHeight({text: gameConfig.customText, index: 0}, false) + dummyWindow.padding * 2;
             const x = gameConfig.barX + gameConfig.textOffsetX;
             const y = gameConfig.barY - textHeight + gameConfig.textOffsetY;
-            this._customTextWindow = new CustomTextWindow(new Rectangle(x, y, textWidth, textHeight), gameConfig.customText);
-            this.addWindow(this._customTextWindow);
+const showBackground = PluginManager.parameters('MiniGameBar')["ShowWindowBackground"].toLowerCase() === "true";
+  this._customTextWindow = new CustomTextWindow(new Rectangle(x, y, width, height), customText, showBackground);           
+  this.addWindow(this._customTextWindow);
         } else {
             console.log("Custom Text not provided or empty.");
         }
@@ -434,7 +453,6 @@
     Scene_Map.prototype.endBarArrowGame = function() {
         this.removeChild(this._barSprite);
         this.removeChild(this._arrowSprite);
-
         // Eliminar sombreado
         if (this._barShadowSprite) {
             this.removeChild(this._barShadowSprite);
@@ -442,17 +460,16 @@
         if (this._arrowShadowSprite) {
             this.removeChild(this._arrowShadowSprite);
         }
-
         console.log("Removing Custom Text");
-
         if (this._customTextWindow) {
-            this.removeWindow(this._customTextWindow);
+            this._customTextWindow.contents.clear(); // Limpia el contenido de la ventana
+            this.removeChild(this._customTextWindow); // Usa removeChild en lugar de removeWindow
             this._customTextWindow = null;
         }
-
         activeBarGame = null;
         $gameMap._interpreter.setWaitMode('');
     };
+    
 
     const _Game_Player_canMove = Game_Player.prototype.canMove;
     Game_Player.prototype.canMove = function() {
