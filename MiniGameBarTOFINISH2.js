@@ -293,7 +293,14 @@
             this._barShadowSprite.drawRect(gameConfig.barX + gameConfig.shadowOffsetX, gameConfig.barY + gameConfig.shadowOffsetY, gameConfig.barWidth, gameConfig.barHeight);
             this._barShadowSprite.endFill();
             this.addChild(this._barShadowSprite);
+        } else {
+            if (this._barShadowSprite) {
+                this.removeChild(this._barShadowSprite);
+                this._barShadowSprite = null;
+            }
         }
+
+
         this._barSprite = new PIXI.Graphics();
         this.addChild(this._barSprite);
 
@@ -340,13 +347,15 @@
         this._arrowSprite.x = arrowX;
         this._arrowSprite.y = gameConfig.barY + gameConfig.barHeight;
         
-        // Dibujar sombreado de la flecha
         if (gameConfig.enableShadow && this._arrowShadowSprite) {
             this._arrowShadowSprite.x = arrowX + gameConfig.shadowOffsetX;
             this._arrowShadowSprite.y = gameConfig.barY + gameConfig.barHeight + gameConfig.shadowOffsetY;
-        } else if (this._arrowShadowSprite) {
-            this._arrowShadowSprite.visible = false; 
+        } else {
+            if (this._arrowShadowSprite) {
+                this._arrowShadowSprite.visible = false;
+            }
         }
+
     };
 
     
