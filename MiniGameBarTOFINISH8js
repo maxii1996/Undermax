@@ -254,7 +254,12 @@
             this.arrowDirection = 1; 
             this._canMove = false;
             this.positionMode = args.PositionMode;
-
+            this.customText = args.CustomText || "";
+            this.textOffsetX = Number(args.TextOffsetX || 0);
+            this.textOffsetY = Number(args.TextOffsetY || 0);
+            this.textSize = Number(args.TextSize || 28);
+            this.textColor = args.TextColor || "#FFFFFF";
+            
            
             this.enableShadow = (args.EnableShadow === 'true' || args.EnableShadow === true);
 
@@ -313,6 +318,10 @@
     };
 
     Scene_Map.prototype.createBarArrowGame = function(gameConfig) {
+
+        console.log("Custom Text Created:", gameConfig.customText);
+console.log("Text Position:", this._customTextSprite.x, this._customTextSprite.y);
+
         // If it's "Automatic", adjust the X and Y positions
         if (gameConfig.positionMode === "Automatic") {
             const tileWidth = $gameMap.tileWidth();
@@ -321,15 +330,24 @@
             gameConfig.barY = $gamePlayer.screenY() - tileHeight - gameConfig.barHeight;
         }
 
-        if (gameConfig.customText) {
+        if (gameConfig.customText && gameConfig.customText !== "") {
             this._customTextSprite = new PIXI.Text(gameConfig.customText, {
                 fontSize: gameConfig.textSize,
                 fill: gameConfig.textColor
             });
-            this._customTextSprite.x = gameConfig.barX + gameConfig.textOffsetX;
-            this._customTextSprite.y = gameConfig.barY + gameConfig.textOffsetY - gameConfig.textSize; // Ensure the text is above the bar
-            this.addChild(this._customTextSprite);
+            
+            // Asegúrate de que el sprite se ha creado antes de intentar acceder a sus propiedades
+            if (this._customTextSprite) {
+                this._customTextSprite.x = gameConfig.barX + gameConfig.textOffsetX;
+                this._customTextSprite.y = gameConfig.barY - this._customTextSprite.height + gameConfig.textOffsetY;
+                this.addChild(this._customTextSprite);
+                console.log("Custom Text Created:", gameConfig.customText);
+                console.log("Text Position:", this._customTextSprite.x, this._customTextSprite.y);
+            }
+        } else {
+            console.log("Custom Text not provided or empty.");
         }
+
     
         this._barSprite = new PIXI.Graphics();
         this._arrowSprite = new PIXI.Text(gameConfig.arrowIcon, {
@@ -420,10 +438,14 @@
             this.removeChild(this._arrowShadowSprite);
         }
 
-        if (this._customTextSprite) {
-            this.removeChild(this._customTextSprite);
-            this._customTextSprite = null;
-        }
+        console.log("Removing Custom Text");
+
+     // Remove Custom Text
+if (this._customTextSprite) {
+    this.removeChild(this._customTextSprite);
+    this._customTextSprite = null;
+}
+
 
         activeBarGame = null;
         $gameMap._interpreter.setWaitMode('');
