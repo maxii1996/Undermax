@@ -169,14 +169,34 @@
  * @desc Size of the arrow in pixels.
  * @default 16
  *
-
+ * @arg EnableShadow
+ * @type boolean
+ * @text Habilitar Sombreado
+ * @desc Habilita o deshabilita el sombreado.
+ * @default true
+ *
+ * @arg ShadowColor
+ * @type text
+ * @text Color del Sombreado
+ * @desc Color del sombreado en formato HEX.
+ * @default #000000
+ *
+ * @arg ShadowOffsetX
+ * @type number
+ * @text Posicion X del sombreado
+ * @desc Offset en la posición X del sombreado.
+ * @default 2
+ *
+ * @arg ShadowOffsetY
+ * @type number
+ * @text Posicion Y del sombreado
+ * @desc Offset en la posición Y del sombreado.
+ * @default 2
+ *
  *
  * @help
  * Use the plugin command "startBar" to start the mini-game.
  */
-
-
-
 
 (() => {
     const BAR_LENGTH = 100;
@@ -200,11 +220,15 @@
             this.arrowSpeed = Number(args.ArrowSpeed);
             this.arrowIcon = args.ArrowIcon;
             this.arrowSize = Number(args.ArrowSize);
-
             this.arrowPosition = 0;
             this.arrowDirection = 1; // 1: derecha, -1: izquierda
-
             this._canMove = false;
+
+            // Propiedades del sombreado
+            this.enableShadow = args.EnableShadow;
+            this.shadowColor = args.ShadowColor;
+            this.shadowOffsetX = Number(args.ShadowOffsetX);
+            this.shadowOffsetY = Number(args.ShadowOffsetY);
 
             SceneManager._scene.createBarArrowGame(this);
         }
@@ -214,9 +238,7 @@
             if (this.arrowPosition <= 0 || this.arrowPosition >= BAR_LENGTH) {
                 this.arrowDirection *= -1;
             }
-
             SceneManager._scene.drawArrow(this);
-
             if (Input.isTriggered('ok')) {
                 this.checkArrowPosition();
             }
@@ -225,11 +247,11 @@
         checkArrowPosition() {
             const adjustedStart = this.rangoStart - this.coyoteTime;
             const adjustedEnd = this.rangoEnd + this.coyoteTime;
-        
+
             console.log("Arrow Position:", this.arrowPosition);
             console.log("Adjusted Start:", adjustedStart);
             console.log("Adjusted End:", adjustedEnd);
-        
+
             if (this.arrowPosition >= adjustedStart && this.arrowPosition <= adjustedEnd) {
                 $gameSwitches.setValue(this.successSwitchId, true);
                 $gameSwitches.setValue(this.failSwitchId, false);
@@ -239,10 +261,6 @@
             }
             SceneManager._scene.endBarArrowGame();
         }
-        
-        
-        
-
     }
 
     PluginManager.registerCommand('MiniGameBar', 'startBar', args => {
@@ -257,19 +275,8 @@
         }
     };
 
- 
-    
     const _Scene_Map_update = Scene_Map.prototype.update;
     Scene_Map.prototype.update = function() {
-        _Scene_Map_update.call(this);
-        if ($gameSwitches.value(this.successSwitchId) && !this._successSoundPlayed) {
-      
-        } else if ($gameSwitches.value(this.failSwitchId) && !this._failureSoundPlayed) {
-       
-        }
-    };
-
-Scene_Map.prototype.update = function() {
         _Scene_Map_update.call(this);
         if (activeBarGame) {
             activeBarGame.updateArrow();
@@ -278,17 +285,23 @@ Scene_Map.prototype.update = function() {
 
     Scene_Map.prototype.createBarArrowGame = function(gameConfig) {
         console.log("Creando juego de barra y flecha con configuración:", gameConfig);
-
         this._barSprite = new PIXI.Graphics();
         this._arrowSprite = new PIXI.Text(gameConfig.arrowIcon, {
             fontSize: gameConfig.arrowSize,
             fill: gameConfig.arrowColor
         });
-
         this.addChild(this._barSprite);
         this.addChild(this._arrowSprite);
-
         this._barSprite.clear();
+
+        // Sombreado para la barra
+        if (gameConfig.enableShadow) {
+            this._barShadowSprite = new PIXI.Graphics();
+            this._barShadowSprite.beginFill(parseInt(gameConfig.shadowColor.slice(1), 16));
+            this._barShadowSprite.drawRect(gameConfig.barX + gameConfig.shadowOffsetX, gameConfig.barY + gameConfig.shadowOffsetY, gameConfig.barWidth, gameConfig.barHeight);
+            this._barShadowSprite.endFill();
+            this.addChildAt(this._barShadowSprite, 0); // Asegurarse de que el sombreado esté detrás
+        }
 
         if (gameConfig.barColors.length > 1) {
             let stepWidth = gameConfig.barWidth / gameConfig.barColors.length;
@@ -305,10 +318,18 @@ Scene_Map.prototype.update = function() {
 
         const rangeStartX = gameConfig.barX + (gameConfig.barWidth * (gameConfig.rangoStart / 100));
         const rangeWidth = gameConfig.barWidth * ((gameConfig.rangoEnd - gameConfig.rangoStart) / 100);
-
         this._barSprite.beginFill(parseInt(gameConfig.rangeColor.slice(1), 16));
         this._barSprite.drawRect(rangeStartX, gameConfig.barY, rangeWidth, gameConfig.barHeight);
         this._barSprite.endFill();
+
+        // Sombreado para la flecha
+        if (gameConfig.enableShadow) {
+            this._arrowShadowSprite = new PIXI.Text(gameConfig.arrowIcon, {
+                fontSize: gameConfig.arrowSize,
+                fill: gameConfig.shadowColor
+            });
+            this.addChildAt(this._arrowShadowSprite, 1); // Asegurarse de que el sombreado esté detrás
+        }
     };
 
     Scene_Map.prototype.drawArrow = function(gameConfig) {
@@ -316,11 +337,26 @@ Scene_Map.prototype.update = function() {
         const arrowX = gameConfig.barX + (gameConfig.barWidth * (gameConfig.arrowPosition / 100));
         this._arrowSprite.x = arrowX;
         this._arrowSprite.y = gameConfig.barY + gameConfig.barHeight;
+
+        // Dibujar sombreado de la flecha
+        if (gameConfig.enableShadow && this._arrowShadowSprite) {
+            this._arrowShadowSprite.x = arrowX + gameConfig.shadowOffsetX;
+            this._arrowShadowSprite.y = gameConfig.barY + gameConfig.barHeight + gameConfig.shadowOffsetY;
+        }
     };
 
     Scene_Map.prototype.endBarArrowGame = function() {
         this.removeChild(this._barSprite);
         this.removeChild(this._arrowSprite);
+
+        // Eliminar sombreado
+        if (this._barShadowSprite) {
+            this.removeChild(this._barShadowSprite);
+        }
+        if (this._arrowShadowSprite) {
+            this.removeChild(this._arrowShadowSprite);
+        }
+
         activeBarGame = null;
         $gameMap._interpreter.setWaitMode('');
     };
@@ -356,7 +392,6 @@ Scene_Map.prototype.update = function() {
         }
     };
 
-
     const _Game_Interpreter_updateWaitMode = Game_Interpreter.prototype.updateWaitMode;
     Game_Interpreter.prototype.updateWaitMode = function() {
         if (this._waitMode === 'minigame') {
@@ -364,5 +399,4 @@ Scene_Map.prototype.update = function() {
         }
         return _Game_Interpreter_updateWaitMode.call(this);
     };
-
 })();
