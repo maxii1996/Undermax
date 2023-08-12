@@ -192,6 +192,36 @@
  * @desc Offset in the Y position of the shadow.
  * @default 2
  *
+ * 
+ * @arg CustomText
+ * @type text
+ * @text Custom Text
+ * @desc Text that will appear during the minigame.
+ * @default 
+
+ * @arg TextOffsetX
+ * @type number
+ * @text Text Offset X
+ * @desc Offset in the X position of the text.
+ * @default 0
+
+ * @arg TextOffsetY
+ * @type number
+ * @text Text Offset Y
+ * @desc Offset in the Y position of the text.
+ * @default -30
+
+ * @arg TextSize
+ * @type number
+ * @text Text Size
+ * @desc Size of the text.
+ * @default 20
+
+ * @arg TextColor
+ * @type text
+ * @text Text Color
+ * @desc Color of the text in HEX format.
+ * @default #FFFFFF
  *
  * @help
  * Use the plugin command "startBar" to start the mini-game.
@@ -290,6 +320,16 @@
             gameConfig.barX = $gamePlayer.screenX() - gameConfig.barWidth / 2;
             gameConfig.barY = $gamePlayer.screenY() - tileHeight - gameConfig.barHeight;
         }
+
+        if (gameConfig.customText) {
+            this._customTextSprite = new PIXI.Text(gameConfig.customText, {
+                fontSize: gameConfig.textSize,
+                fill: gameConfig.textColor
+            });
+            this._customTextSprite.x = gameConfig.barX + gameConfig.textOffsetX;
+            this._customTextSprite.y = gameConfig.barY + gameConfig.textOffsetY - gameConfig.textSize; // Ensure the text is above the bar
+            this.addChild(this._customTextSprite);
+        }
     
         this._barSprite = new PIXI.Graphics();
         this._arrowSprite = new PIXI.Text(gameConfig.arrowIcon, {
@@ -378,6 +418,11 @@
         }
         if (this._arrowShadowSprite) {
             this.removeChild(this._arrowShadowSprite);
+        }
+
+        if (this._customTextSprite) {
+            this.removeChild(this._customTextSprite);
+            this._customTextSprite = null;
         }
 
         activeBarGame = null;
