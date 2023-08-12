@@ -303,6 +303,9 @@
             this.addChild(this._barShadowSprite);
         }
 
+        this._barSprite = new PIXI.Graphics();
+        this.addChild(this._barSprite);
+
         if (gameConfig.barColors.length > 1) {
             let stepWidth = gameConfig.barWidth / gameConfig.barColors.length;
             for (let i = 0; i < gameConfig.barColors.length; i++) {
@@ -321,24 +324,22 @@
         this._barSprite.beginFill(parseInt(gameConfig.rangeColor.slice(1), 16));
         this._barSprite.drawRect(rangeStartX, gameConfig.barY, rangeWidth, gameConfig.barHeight);
         this._barSprite.endFill();
-
+        
         if (gameConfig.enableShadow) {
             this._arrowShadowSprite = new PIXI.Text(gameConfig.arrowIcon, {
                 fontSize: gameConfig.arrowSize,
                 fill: gameConfig.shadowColor
             });
-            this._arrowShadowSprite.x = gameConfig.barX + gameConfig.shadowOffsetX;
-            this._arrowShadowSprite.y = gameConfig.barY + gameConfig.barHeight + gameConfig.shadowOffsetY;
             this.addChild(this._arrowShadowSprite);
         }
-    
+
         this._arrowSprite = new PIXI.Text(gameConfig.arrowIcon, {
             fontSize: gameConfig.arrowSize,
             fill: gameConfig.arrowColor
         });
         this.addChild(this._arrowSprite);
     
-        // ... (resto del código de creación de la barra)
+  
     };
 
     Scene_Map.prototype.drawArrow = function(gameConfig) {
