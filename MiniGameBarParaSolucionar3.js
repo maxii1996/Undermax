@@ -412,18 +412,25 @@
 
     Scene_Map.prototype.createBarArrowGame = function(gameConfig) {
 
+        
+
         console.log("ShowWindowBackground value:", gameConfig.ShowWindowBackground);
+        console.log("Contenido de gameConfig:", gameConfig);
 
 
 
-        if (gameConfig.DarkenScreen) {
+
+        if (gameConfig["Darken Screen"] === "true") {
+
+            console.log("DarkenScreen está habilitado");
             this._darkenSprite = new PIXI.Graphics();
             this._darkenSprite.beginFill(parseInt(gameConfig.ScreenDarknessColor.slice(1), 16), gameConfig.ScreenDarknessOpacity / 255);
             this._darkenSprite.drawRect(0, 0, Graphics.width, Graphics.height);
             this._darkenSprite.endFill();
             this.addChild(this._darkenSprite);
+        } else {
+            console.log("DarkenScreen está deshabilitado");
         }
-        
 
 
 
@@ -538,6 +545,16 @@
     
     Scene_Map.prototype.endBarArrowGame = function() {
 
+        
+            console.log("Entrando a endBarArrowGame");
+            
+            if (this._darkenSprite) {
+                console.log("Eliminando _darkenSprite");
+                this.removeChild(this._darkenSprite);
+                this._darkenSprite = null;
+            } else {
+                console.log("_darkenSprite no existe");
+            }
 
 
         this.removeChild(this._barSprite);
@@ -550,11 +567,7 @@
             this.removeChild(this._arrowShadowSprite);
         }
 
-        if (this._darkenSprite) {
-            this.removeChild(this._darkenSprite);
-            this._darkenSprite = null;
-        }
-        
+      
         
         
         console.log("Removing Custom Text");
