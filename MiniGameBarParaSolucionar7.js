@@ -429,12 +429,12 @@
         const screenDarknessColor = this._screenDarknessColor;
         
 
-        if (darkenScreen) {
+        if (gameConfig._darkenScreen) {
             this._darkenSprite = new Sprite();
             this._darkenSprite.bitmap = new Bitmap(Graphics.width, Graphics.height);
-            this._darkenSprite.bitmap.fillAll(screenDarknessColor);
-            this._darkenSprite.opacity = screenDarknessOpacity;
-            SceneManager._scene.addChild(this._darkenSprite);
+            this._darkenSprite.bitmap.fillAll(gameConfig._screenDarknessColor);
+            this._darkenSprite.opacity = gameConfig._screenDarknessOpacity;
+            this.addChild(this._darkenSprite);
         }
 
 
@@ -553,10 +553,9 @@
             console.log("Entrando a endBarArrowGame");
             
             if (this._darkenSprite) {
-                SceneManager._scene.removeChild(this._darkenSprite);
+                this.removeChild(this._darkenSprite);
                 this._darkenSprite = null;
             }
-            
 
 
         this.removeChild(this._barSprite);
