@@ -303,6 +303,9 @@
             this.shadowColor = args.ShadowColor;
             this.shadowOffsetX = Number(args.ShadowOffsetX);
             this.shadowOffsetY = Number(args.ShadowOffsetY);
+            this._darkenScreen = false;
+            this._screenDarknessOpacity = 128;
+            this._screenDarknessColor = "#000000";
 
             SceneManager._scene.createBarArrowGame(this);
         }
@@ -418,20 +421,20 @@
         console.log("Contenido de gameConfig:", gameConfig);
 
 
+        this._darkenScreen = gameConfig.DarkenScreen;
+        this._screenDarknessOpacity = gameConfig.ScreenDarknessOpacity;
+        this._screenDarknessColor = gameConfig.ScreenDarknessColor;
 
-
-        if (gameConfig["Darken Screen"] === "true") {
-
+        if (this._darkenScreen) {
             console.log("DarkenScreen está habilitado");
             this._darkenSprite = new PIXI.Graphics();
-            this._darkenSprite.beginFill(parseInt(gameConfig.ScreenDarknessColor.slice(1), 16), gameConfig.ScreenDarknessOpacity / 255);
+            this._darkenSprite.beginFill(parseInt(this._screenDarknessColor.slice(1), 16), this._screenDarknessOpacity / 255);
             this._darkenSprite.drawRect(0, 0, Graphics.width, Graphics.height);
             this._darkenSprite.endFill();
             this.addChild(this._darkenSprite);
         } else {
             console.log("DarkenScreen está deshabilitado");
         }
-
 
 
         // If it's "Automatic", adjust the X and Y positions
