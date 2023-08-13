@@ -305,8 +305,9 @@
             this.shadowOffsetY = Number(args.ShadowOffsetY);
            
             this._darkenScreen = (args.DarkenScreen === 'true' || args.DarkenScreen === true);
-            this._screenDarknessOpacity = Number(args.ScreenDarknessOpacity);
-            this._screenDarknessColor = args.ScreenDarknessColor;
+            this._screenDarknessOpacity = Number(args.ScreenDarknessOpacity || 0);
+            this._screenDarknessColor = args.ScreenDarknessColor || '#000000';
+            
 
 
             SceneManager._scene.createBarArrowGame(this);
@@ -423,20 +424,17 @@
         console.log("Contenido de gameConfig:", gameConfig);
 
 
-        const darkenScreen = gameConfig._darkenScreen;
-        const screenDarknessOpacity = gameConfig._screenDarknessOpacity;
-        const screenDarknessColor = gameConfig._screenDarknessColor;
+        const darkenScreen = this._darkenScreen;
+        const screenDarknessOpacity = this._screenDarknessOpacity;
+        const screenDarknessColor = this._screenDarknessColor;
         
 
-        if (this._darkenScreen) {
-            console.log("DarkenScreen está habilitado");
-            this._darkenSprite = new PIXI.Graphics();
-            this._darkenSprite.beginFill(parseInt(this._screenDarknessColor.slice(1), 16), this._screenDarknessOpacity / 255);
-            this._darkenSprite.drawRect(0, 0, Graphics.width, Graphics.height);
-            this._darkenSprite.endFill();
-            this.addChild(this._darkenSprite);
-        } else {
-            console.log("DarkenScreen está deshabilitado");
+        if (darkenScreen) {
+            this._darkenSprite = new Sprite();
+            this._darkenSprite.bitmap = new Bitmap(Graphics.width, Graphics.height);
+            this._darkenSprite.bitmap.fillAll(screenDarknessColor);
+            this._darkenSprite.opacity = screenDarknessOpacity;
+            SceneManager._scene.addChild(this._darkenSprite);
         }
 
 
@@ -555,12 +553,10 @@
             console.log("Entrando a endBarArrowGame");
             
             if (this._darkenSprite) {
-                console.log("Eliminando _darkenSprite");
-                this.removeChild(this._darkenSprite);
+                SceneManager._scene.removeChild(this._darkenSprite);
                 this._darkenSprite = null;
-            } else {
-                console.log("_darkenSprite no existe");
             }
+            
 
 
         this.removeChild(this._barSprite);
