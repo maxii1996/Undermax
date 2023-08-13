@@ -303,9 +303,11 @@
             this.shadowColor = args.ShadowColor;
             this.shadowOffsetX = Number(args.ShadowOffsetX);
             this.shadowOffsetY = Number(args.ShadowOffsetY);
-            this._darkenScreen = false;
-            this._screenDarknessOpacity = 128;
-            this._screenDarknessColor = "#000000";
+           
+            this._darkenScreen = (args.DarkenScreen === 'true' || args.DarkenScreen === true);
+            this._screenDarknessOpacity = Number(args.ScreenDarknessOpacity);
+            this._screenDarknessColor = args.ScreenDarknessColor;
+
 
             SceneManager._scene.createBarArrowGame(this);
         }
@@ -421,9 +423,10 @@
         console.log("Contenido de gameConfig:", gameConfig);
 
 
-        this._darkenScreen = gameConfig.DarkenScreen;
-        this._screenDarknessOpacity = gameConfig.ScreenDarknessOpacity;
-        this._screenDarknessColor = gameConfig.ScreenDarknessColor;
+        const darkenScreen = gameConfig._darkenScreen;
+        const screenDarknessOpacity = gameConfig._screenDarknessOpacity;
+        const screenDarknessColor = gameConfig._screenDarknessColor;
+        
 
         if (this._darkenScreen) {
             console.log("DarkenScreen está habilitado");
