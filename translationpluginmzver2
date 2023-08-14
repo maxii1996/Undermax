@@ -1,7 +1,7 @@
 /*:
  * @target MZ
- * @plugindesc [v1.0.1] - Manage game texts in multiple languages.
- * @author Open Digital World
+ * @plugindesc [v1.1]
+ * @author Open Digital World | Ext. By Maxii1996
  * @url https://opendigitalworld.itch.io/rmmz-multi-language-system-plugin
  * @orderAfter VisuMZ_1_OptionsCore
  *
@@ -68,6 +68,23 @@
  * @desc The "OFF" wording of the option value, in its original translation.
  * @type string
  * @default OFF
+ * 
+ * 
+ * @command ManualTranslation
+ * @text Manual Translation
+ * @desc Translate a specific text and store it in a game variable.
+ *
+ * @arg text
+ * @text Text to Translate
+ * @desc The text you want to translate.
+ * @type multiline_string
+ * @default 
+ *
+ * @arg variableId
+ * @text Output Variable ID
+ * @desc The ID of the game variable where the translated text will be stored.
+ * @type variable
+ * @default 1
  *
  */
 
@@ -87,11 +104,9 @@ ODW.MLS.pluginVersion = [1, 0, 1];
 
 	const pluginParams = PluginManager.parameters(ODW.MLS.pluginName);
 
-	
 	$._option = pluginParams.option;
 	$._folder = pluginParams.folder;
 	$._languages = JSON.parse(pluginParams.languages);
-
 
 	$.isCompatibleWithVisuMZOptionsCore = function() {
 		return Imported["VisuMZ_1_OptionsCore"];
@@ -101,16 +116,13 @@ ODW.MLS.pluginVersion = [1, 0, 1];
  		return this._option;
  	};
 
-
 	$.getFolder = function() {
 		return this._folder;
 	};
 
-
 	$.getCurrentIndex = function() {
 		return ConfigManager["languageIndex"];
 	};
-
 
 	$.getPrevIndex = function() {
 		let newIndex = ConfigManager["languageIndex"] - 1;
@@ -120,7 +132,6 @@ ODW.MLS.pluginVersion = [1, 0, 1];
 		return newIndex;
 	};
 
-
 	$.getNextIndex = function() {
 		let newIndex = ConfigManager["languageIndex"] + 1;
 		if (newIndex >= this._languages.length) {
@@ -128,7 +139,6 @@ ODW.MLS.pluginVersion = [1, 0, 1];
 		}
 		return newIndex;
 	};
-
 
 	$.updateIndex = function(newIndex) {
 		if (this._languages.length > 0) {
@@ -156,7 +166,6 @@ ODW.MLS.pluginVersion = [1, 0, 1];
 		return languageCodes;
 	};
 
-
  	$.getCode = function(index) {
  		let languageCode = '';
  		if (this._languages.length > 0) {
@@ -172,14 +181,11 @@ ODW.MLS.pluginVersion = [1, 0, 1];
  		return languageCode;
  	};
 
-
 	
  	$.getCurrentCode = function() {
  		return this.getCode(this.getCurrentIndex());
  	};
 
-
-	
  	$.getLabels = function() {
  		let languageLabels = [];
  		if (this._languages.length > 0) {
@@ -194,7 +200,6 @@ ODW.MLS.pluginVersion = [1, 0, 1];
  	};
 
 
-	
  	$.getLabel = function(index) {
  		let languageLabel = '';
  		if (this._languages.length > 0) {
@@ -210,20 +215,15 @@ ODW.MLS.pluginVersion = [1, 0, 1];
  		return languageLabel;
  	};
 
-
-
+	
  	$.getCurrentLabel = function() {
  		return this.getLabel(this.getCurrentIndex());
  	};
 
 
-	
 	$._database = {};
-
-	
 	$._isDatabaseLoaded = false;
 
-	
 	
 	$.loadDatabase = function() {
 		this._database = {};
@@ -250,13 +250,10 @@ ODW.MLS.pluginVersion = [1, 0, 1];
 	};
 
 
-	
 	$.isDatabaseLoaded = function() {
 		return this._isDatabaseLoaded;
 	};
 
-
-	
 	$.getText = function(oldText) {
 		const regex = /\${([\w|\.]+)}/gm;
 		let regexParts;
@@ -266,7 +263,6 @@ ODW.MLS.pluginVersion = [1, 0, 1];
 		}
 		return newText;
 	};
-
 
 	
 	$.getTextDatabase = function(textCode) {
@@ -278,11 +274,9 @@ ODW.MLS.pluginVersion = [1, 0, 1];
 	};
 
 
-	
 	$.updateGameTitle = function() {
 		document.title = this.getText($dataSystem.gameTitle);
 	};
-
 
 	
 	$.getMiss = function() {
@@ -301,7 +295,6 @@ ODW.MLS.pluginVersion = [1, 0, 1];
 		return missLabel;
 	};
 
-
 	
 	$.getOn = function() {
 		let onLabel = 'ON';
@@ -318,7 +311,6 @@ ODW.MLS.pluginVersion = [1, 0, 1];
 		}
 		return onLabel;
 	};
-
 
 	
 	$.getOff = function() {
@@ -337,18 +329,14 @@ ODW.MLS.pluginVersion = [1, 0, 1];
 		return offLabel;
 	};
 
-
-	
 	$.logError = function(error) {
 		console.log("Plugin: " + this.pluginName + "\nError: " + error);
 	};
-
 
 	
 	$.logErrorIndex = function(index, error) {
 		console.log("Plugin: " + this.pluginName + "\nIndex: " + index + "\nError: " + error);
 	};
-
 
 	
 	$.logErrorFile = function(file, error) {
@@ -357,13 +345,10 @@ ODW.MLS.pluginVersion = [1, 0, 1];
 
 })(ODW.MLS);
 
-
-
 const ODW_MLS_Bitmap_drawText = Bitmap.prototype.drawText;
 Bitmap.prototype.drawText = function(text, x, y, maxWidth, lineHeight, align) {
 	ODW_MLS_Bitmap_drawText.call(this, ODW.MLS.getText(text), x, y, maxWidth, lineHeight, align);
 };
-
 
 DataManager.loadLanguageFile = function(index, src) {
 	const xhr = new XMLHttpRequest();
@@ -374,7 +359,6 @@ DataManager.loadLanguageFile = function(index, src) {
 	xhr.onerror = () => this.onXhrLanguageFileError(index, src, url, "File not found.");
 	xhr.send();
 };
-
 
 DataManager.onXhrLanguageFileLoad = function(xhr, index, src, url) {
 	if (xhr.status < 400) {
@@ -394,13 +378,11 @@ DataManager.onXhrLanguageFileLoad = function(xhr, index, src, url) {
 	}
 };
 
-
 DataManager.onXhrLanguageFileError = function(index, src, url, e) {
 	ODW.MLS.logErrorFile(src, e);
 	const error = {index: index, src: src, url: url};
 	this._errors.push(error);
 };
-
 
 ConfigManager.languageIndex = 0;
 
@@ -417,7 +399,6 @@ ConfigManager.applyData = function(config) {
 	this.languageIndex = this.readLanguageIndex(config, "languageIndex", 0);
 };
 
-
 ConfigManager.readLanguageIndex = function(config, name, defaultValue) {
     if (name in config) {
         return config[name];
@@ -425,8 +406,6 @@ ConfigManager.readLanguageIndex = function(config, name, defaultValue) {
         return defaultValue;
     }
 }
-
-
 
 const ODW_MLS_TextManager_basic = TextManager.basic;
 TextManager.basic = function(basicId) {
@@ -448,14 +427,13 @@ TextManager.message = function(messageId) {
 	return ODW.MLS.getText(ODW_MLS_TextManager_message.apply(this, arguments));
 };
 
-
+// Redraw.
 Object.defineProperty( TextManager, 'currencyUnit', {
 	get: function() {
 		return ODW.MLS.getText($dataSystem.currencyUnit);
 	},
 	configurable: true
 });
-
 
 const ODW_MLS_Game_Message_add = Game_Message.prototype.add;
 Game_Message.prototype.add = function(text) {
@@ -467,8 +445,6 @@ Game_Message.prototype.setChoices = function(choices, defaultType, cancelType) {
 	choices = choices.map(choice => ODW.MLS.getText(choice));
 	ODW_MLS_Game_Message_setChoices.call(this, choices, defaultType, cancelType);
 };
-
-
 
 const ODW_MLS_Scene_Boot_isPlayerDataLoaded = Scene_Boot.prototype.isPlayerDataLoaded;
 Scene_Boot.prototype.isPlayerDataLoaded = function() {
@@ -483,11 +459,9 @@ Scene_Boot.prototype.isPlayerDataLoaded = function() {
 	return false;
 };
 
-
 Scene_Boot.prototype.updateDocumentTitle = function() {
 	ODW.MLS.updateGameTitle();
 };
-
 
 Sprite_Damage.prototype.createMiss = function() {
     const h = this.fontSize();
@@ -496,7 +470,6 @@ Sprite_Damage.prototype.createMiss = function() {
     sprite.bitmap.drawText(ODW.MLS.getMiss(), 0, 0, w, h, "center");
     sprite.dy = 0;
 };
-
 
 const ODW_MLS_Window_Base_textWidth = Window_Base.prototype.textWidth;
 Window_Base.prototype.textWidth = function(text) {
@@ -608,4 +581,9 @@ Window_Options.prototype.refreshLanguage = function() {
 };
 
 
-
+PluginManager.registerCommand('ODW_MultiLanguageSystem', 'ManualTranslation', args => {
+    const textToTranslate = args.text;
+    const variableId = Number(args.variableId);
+    const translatedText = ODW.MLS.getText(textToTranslate);
+    $gameVariables.setValue(variableId, translatedText);
+});
