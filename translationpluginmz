@@ -1,0 +1,611 @@
+/*:
+ * @target MZ
+ * @plugindesc [v1.0.1] - Manage game texts in multiple languages.
+ * @author Open Digital World
+ * @url https://opendigitalworld.itch.io/rmmz-multi-language-system-plugin
+ * @orderAfter VisuMZ_1_OptionsCore
+ *
+ * @help
+ *
+ * @param option
+ * @text Languages Option
+ * @desc The label of the languages option.
+ * @type string
+ * @default Languages
+ *
+ * @param folder
+ * @text Languages Folder
+ * @desc The folder containing all the languages files in subdirectories per language.
+ * @type string
+ * @default languages
+ *
+ * @param languages
+ * @text Languages
+ * @desc The list of all the languages used in the game.
+ * @type struct<Language>[]
+ *
+ */
+
+/*~struct~Language:
+ * @param code
+ * @text Language Code
+ * @desc The code of this language, such as the ISO format.
+ * @type string
+ * @default en
+ *
+ * @param label
+ * @text Language Label
+ * @desc The label of this language, in its original translation.
+ * @type string
+ * @default English
+ *
+ * @param folder
+ * @text Language Folder
+ * @desc The folder containing all the files for this language, put inside <Languages Folder>.
+ * @type string
+ * @default eng
+ *
+ * @param files
+ * @text Language Files
+ * @desc The list of all the files for this language.
+ * @type string[]
+ * @default ["main"]
+ *
+ * @param miss
+ * @text Miss Label
+ * @desc The label of the "Miss" text, in its original translation.
+ * @type string
+ * @default Miss
+ *
+ * @param on
+ * @text ON Label
+ * @desc The "ON" wording of the option value, in its original translation.
+ * @type string
+ * @default ON
+ *
+ * @param off
+ * @text OFF Label
+ * @desc The "OFF" wording of the option value, in its original translation.
+ * @type string
+ * @default OFF
+ *
+ */
+
+var Imported = Imported || {};
+Imported.ODW_MultiLanguageSystem = true;
+
+var ODW = ODW || {};
+ODW.MLS = ODW.MLS || {};
+ODW.MLS.pluginName = "ODW_MultiLanguageSystem";
+ODW.MLS.pluginVersion = [1, 0, 1];
+
+(($) => {
+
+	'use strict';
+
+
+
+	const pluginParams = PluginManager.parameters(ODW.MLS.pluginName);
+
+	
+	$._option = pluginParams.option;
+	$._folder = pluginParams.folder;
+	$._languages = JSON.parse(pluginParams.languages);
+
+
+	$.isCompatibleWithVisuMZOptionsCore = function() {
+		return Imported["VisuMZ_1_OptionsCore"];
+	};
+
+ 	$.getOption = function() {
+ 		return this._option;
+ 	};
+
+
+	$.getFolder = function() {
+		return this._folder;
+	};
+
+
+	$.getCurrentIndex = function() {
+		return ConfigManager["languageIndex"];
+	};
+
+
+	$.getPrevIndex = function() {
+		let newIndex = ConfigManager["languageIndex"] - 1;
+		if (newIndex < 0) {
+			newIndex = this._languages.length - 1;
+		}
+		return newIndex;
+	};
+
+
+	$.getNextIndex = function() {
+		let newIndex = ConfigManager["languageIndex"] + 1;
+		if (newIndex >= this._languages.length) {
+			newIndex = 0;
+		}
+		return newIndex;
+	};
+
+
+	$.updateIndex = function(newIndex) {
+		if (this._languages.length > 0) {
+			if (newIndex < this._levels.length) {
+				ConfigManager["languageIndex"] = newIndex;
+				ConfigManager.save();
+			} else {
+				this.logErrorIndex(newIndex, "New index not found in configured languages.");
+			}
+		} else {
+			this.logError("No languages configured.");
+		}
+	};
+
+	$.getCodes = function() {
+		let languageCodes = [];
+		if (this._languages.length > 0) {
+			for (let language of this._languages) {
+				language = JSON.parse(language);
+				languageCodes.push(this.getText(language.code));
+			}
+		} else {
+			this.logError("No languages configured.");
+		}
+		return languageCodes;
+	};
+
+
+ 	$.getCode = function(index) {
+ 		let languageCode = '';
+ 		if (this._languages.length > 0) {
+ 			if (index < this._languages.length) {
+ 				const language = JSON.parse(this._languages[index]);
+ 				languageCode = this.getText(language.code);
+ 			} else {
+ 				this.logErrorIndex(index, "No language code configured for this index.");
+ 			}
+ 		} else {
+ 			this.logError("No languages configured.");
+ 		}
+ 		return languageCode;
+ 	};
+
+
+	
+ 	$.getCurrentCode = function() {
+ 		return this.getCode(this.getCurrentIndex());
+ 	};
+
+
+	
+ 	$.getLabels = function() {
+ 		let languageLabels = [];
+ 		if (this._languages.length > 0) {
+			for (let language of this._languages) {
+				language = JSON.parse(language);
+ 				languageLabels.push(this.getText(language.label));
+			}
+ 		} else {
+ 			this.logError("No languages configured.");
+ 		}
+ 		return languageLabels;
+ 	};
+
+
+	
+ 	$.getLabel = function(index) {
+ 		let languageLabel = '';
+ 		if (this._languages.length > 0) {
+ 			if (index < this._languages.length) {
+ 				const language = JSON.parse(this._languages[index]);
+ 				languageLabel = this.getText(language.label);
+ 			} else {
+ 				this.logErrorIndex(index, "No language label configured for this index.");
+ 			}
+ 		} else {
+ 			this.logError("No languages configured.");
+ 		}
+ 		return languageLabel;
+ 	};
+
+
+
+ 	$.getCurrentLabel = function() {
+ 		return this.getLabel(this.getCurrentIndex());
+ 	};
+
+
+	
+	$._database = {};
+
+	
+	$._isDatabaseLoaded = false;
+
+	
+	
+	$.loadDatabase = function() {
+		this._database = {};
+		this._isDatabaseLoaded = false;
+		const currentIndex = this.getCurrentIndex();
+		if (this._languages.length > 0) {
+			if (currentIndex < this._languages.length) {
+				const language = JSON.parse(this._languages[currentIndex]);
+				const languageFiles = JSON.parse(language.files);
+				if (languageFiles.length > 0) {
+					for (const file of languageFiles) {
+						DataManager.loadLanguageFile(currentIndex, this._folder.concat('/') + language.folder.concat( '/' ) + file.concat( '.json'));
+					}
+					this._isDatabaseLoaded = true;
+				} else {
+					this.logErrorIndex(currentIndex, "No language files configured for this index.");
+				}
+			} else {
+				this.logErrorIndex(currentIndex, "No languages configured for this index.");
+			}
+		} else {
+			this.logError("No languages configured.");
+		}
+	};
+
+
+	
+	$.isDatabaseLoaded = function() {
+		return this._isDatabaseLoaded;
+	};
+
+
+	
+	$.getText = function(oldText) {
+		const regex = /\${([\w|\.]+)}/gm;
+		let regexParts;
+		let newText = oldText;
+		while ((regexParts = regex.exec(oldText)) != null) {
+			newText = newText.replace(regexParts[0], this.getTextDatabase(regexParts[1]));
+		}
+		return newText;
+	};
+
+
+	
+	$.getTextDatabase = function(textCode) {
+		if (this._database.hasOwnProperty(textCode)) {
+			return this._database[textCode];
+		} else {
+			return textCode;
+		}
+	};
+
+
+	
+	$.updateGameTitle = function() {
+		document.title = this.getText($dataSystem.gameTitle);
+	};
+
+
+	
+	$.getMiss = function() {
+		let missLabel = 'Miss';
+		const currentIndex = this.getCurrentIndex();
+		if (this._languages.length > 0) {
+			if (currentIndex < this._languages.length) {
+				const language = JSON.parse(this._languages[currentIndex]);
+				missLabel = this.getText(language.miss);
+			} else {
+				this.logErrorIndex(currentIndex, "No languages configured for this index.");
+			}
+		} else {
+			this.logError("No languages configured.");
+		}
+		return missLabel;
+	};
+
+
+	
+	$.getOn = function() {
+		let onLabel = 'ON';
+		const currentIndex = this.getCurrentIndex();
+		if (this._languages.length > 0) {
+			if (currentIndex < this._languages.length) {
+				const language = JSON.parse(this._languages[currentIndex]);
+				onLabel = this.getText(language.on);
+			} else {
+				this.logErrorIndex(currentIndex, "No languages configured for this index.");
+			}
+		} else {
+			this.logError("No languages configured.");
+		}
+		return onLabel;
+	};
+
+
+	
+	$.getOff = function() {
+		let offLabel = 'OFF';
+		const currentIndex = this.getCurrentIndex();
+		if (this._languages.length > 0) {
+			if (currentIndex < this._languages.length) {
+				const language = JSON.parse(this._languages[currentIndex]);
+				offLabel = this.getText(language.off);
+			} else {
+				this.logErrorIndex(currentIndex, "No languages configured for this index.");
+			}
+		} else {
+			this.logError("No languages configured.");
+		}
+		return offLabel;
+	};
+
+
+	
+	$.logError = function(error) {
+		console.log("Plugin: " + this.pluginName + "\nError: " + error);
+	};
+
+
+	
+	$.logErrorIndex = function(index, error) {
+		console.log("Plugin: " + this.pluginName + "\nIndex: " + index + "\nError: " + error);
+	};
+
+
+	
+	$.logErrorFile = function(file, error) {
+		console.log("Plugin: " + this.pluginName + "\nFile: " + file + "\nError: " + error);
+	};
+
+})(ODW.MLS);
+
+
+
+const ODW_MLS_Bitmap_drawText = Bitmap.prototype.drawText;
+Bitmap.prototype.drawText = function(text, x, y, maxWidth, lineHeight, align) {
+	ODW_MLS_Bitmap_drawText.call(this, ODW.MLS.getText(text), x, y, maxWidth, lineHeight, align);
+};
+
+
+DataManager.loadLanguageFile = function(index, src) {
+	const xhr = new XMLHttpRequest();
+	const url = src;
+	xhr.open("GET", url);
+	xhr.responseType = 'json';
+	xhr.onload = () => this.onXhrLanguageFileLoad(xhr, index, src, url);
+	xhr.onerror = () => this.onXhrLanguageFileError(index, src, url, "File not found.");
+	xhr.send();
+};
+
+
+DataManager.onXhrLanguageFileLoad = function(xhr, index, src, url) {
+	if (xhr.status < 400) {
+		try {
+			const languageDatabase = ODW.MLS._database;
+			const languageDatafile = xhr.response;
+			if (languageDatafile) {
+				ODW.MLS._database = {...languageDatabase, ...languageDatafile};
+			} else {
+				this.onXhrLanguageFileError(index, src, url, "JSON file structure incorrect.");
+			}
+		} catch (e) {
+			this.onXhrLanguageFileError(index, src, url, e);
+		}
+	} else {
+		this.onXhrLanguageFileError(index, src, url, "Xhr status " + xhr.status);
+	}
+};
+
+
+DataManager.onXhrLanguageFileError = function(index, src, url, e) {
+	ODW.MLS.logErrorFile(src, e);
+	const error = {index: index, src: src, url: url};
+	this._errors.push(error);
+};
+
+
+ConfigManager.languageIndex = 0;
+
+const ODW_MLS_ConfigManager_makeData = ConfigManager.makeData;
+ConfigManager.makeData = function() {
+	const config = ODW_MLS_ConfigManager_makeData.call(this);
+	config.languageIndex = this.languageIndex;
+    return config;
+};
+
+const ODW_MLS_ConfigManager_applyData = ConfigManager.applyData;
+ConfigManager.applyData = function(config) {
+	ODW_MLS_ConfigManager_applyData.call(this, config);
+	this.languageIndex = this.readLanguageIndex(config, "languageIndex", 0);
+};
+
+
+ConfigManager.readLanguageIndex = function(config, name, defaultValue) {
+    if (name in config) {
+        return config[name];
+    } else {
+        return defaultValue;
+    }
+}
+
+
+
+const ODW_MLS_TextManager_basic = TextManager.basic;
+TextManager.basic = function(basicId) {
+	return ODW.MLS.getText(ODW_MLS_TextManager_basic.apply(this, arguments));
+};
+
+const ODW_MLS_TextManager_param = TextManager.param;
+TextManager.param = function(paramId) {
+	return ODW.MLS.getText(ODW_MLS_TextManager_param.apply(this, arguments));
+};
+
+const ODW_MLS_TextManager_command = TextManager.command;
+TextManager.command = function(commandId) {
+	return ODW.MLS.getText(ODW_MLS_TextManager_command.apply(this, arguments));
+};
+
+const ODW_MLS_TextManager_message = TextManager.message;
+TextManager.message = function(messageId) {
+	return ODW.MLS.getText(ODW_MLS_TextManager_message.apply(this, arguments));
+};
+
+
+Object.defineProperty( TextManager, 'currencyUnit', {
+	get: function() {
+		return ODW.MLS.getText($dataSystem.currencyUnit);
+	},
+	configurable: true
+});
+
+
+const ODW_MLS_Game_Message_add = Game_Message.prototype.add;
+Game_Message.prototype.add = function(text) {
+	ODW_MLS_Game_Message_add.call(this, ODW.MLS.getText(text));
+};
+
+const ODW_MLS_Game_Message_setChoices = Game_Message.prototype.setChoices;
+Game_Message.prototype.setChoices = function(choices, defaultType, cancelType) {
+	choices = choices.map(choice => ODW.MLS.getText(choice));
+	ODW_MLS_Game_Message_setChoices.call(this, choices, defaultType, cancelType);
+};
+
+
+
+const ODW_MLS_Scene_Boot_isPlayerDataLoaded = Scene_Boot.prototype.isPlayerDataLoaded;
+Scene_Boot.prototype.isPlayerDataLoaded = function() {
+	const isCoreLoaded = ODW_MLS_Scene_Boot_isPlayerDataLoaded.call(this);
+	if (isCoreLoaded) {
+		if (ODW.MLS.isDatabaseLoaded()) {
+			return true;
+		} else {
+			ODW.MLS.loadDatabase();
+		}
+	}
+	return false;
+};
+
+
+Scene_Boot.prototype.updateDocumentTitle = function() {
+	ODW.MLS.updateGameTitle();
+};
+
+
+Sprite_Damage.prototype.createMiss = function() {
+    const h = this.fontSize();
+    const w = Math.floor(h * 3.0);
+    const sprite = this.createChildSprite(w, h);
+    sprite.bitmap.drawText(ODW.MLS.getMiss(), 0, 0, w, h, "center");
+    sprite.dy = 0;
+};
+
+
+const ODW_MLS_Window_Base_textWidth = Window_Base.prototype.textWidth;
+Window_Base.prototype.textWidth = function(text) {
+	return ODW_MLS_Window_Base_textWidth.call(this, ODW.MLS.getText(text));
+};
+
+const ODW_MLS_Window_Base_createTextState = Window_Base.prototype.createTextState;
+Window_Base.prototype.createTextState = function(text, x, y, width) {
+	return ODW_MLS_Window_Base_createTextState.call(this, ODW.MLS.getText(text), x, y, width);
+};
+
+const ODW_MLS_Window_Base_actorName = Window_Base.prototype.actorName;
+Window_Base.prototype.actorName = function(n)  {
+	return ODW.MLS.getText(ODW_MLS_Window_Base_actorName.apply(this, arguments));
+};
+
+const ODW_MLS_Window_Base_partyMemberName = Window_Base.prototype.partyMemberName;
+Window_Base.prototype.partyMemberName = function(n) {
+	return ODW.MLS.getText(ODW_MLS_Window_Base_partyMemberName.apply(this, arguments));
+};
+
+const ODW_MLS_Window_Base_convertEscapeCharacters = Window_Base.prototype.convertEscapeCharacters;
+Window_Base.prototype.convertEscapeCharacters = function(text) {
+	return ODW.MLS.getText(ODW_MLS_Window_Base_convertEscapeCharacters.apply(this, arguments));
+};
+
+
+const ODW_MLS_Window_NameEdit_setup = Window_NameEdit.prototype.setup;
+Window_NameEdit.prototype.setup = function(actor, maxLength) {
+	ODW_MLS_Window_NameEdit_setup.apply(this, arguments);
+	this._name = ODW.MLS.getText(this._name).slice(0, this._maxLength);
+	this._index = this._name.length;
+};
+
+
+Window_Options.prototype.booleanStatusText = function(value) {
+    return value ? ODW.MLS.getOn() : ODW.MLS.getOff();
+};
+
+const ODW_MLS_Window_Options_addGeneralOptions = Window_Options.prototype.addGeneralOptions;
+Window_Options.prototype.addGeneralOptions = function() {
+	this.addCommand(ODW.MLS.getText(ODW.MLS.getOption()), "languageIndex");
+	ODW_MLS_Window_Options_addGeneralOptions.call(this);
+};
+
+const ODW_MLS_Window_Options_statusText = Window_Options.prototype.statusText;
+Window_Options.prototype.statusText = function(index) {
+	const symbol = this.commandSymbol(index);
+    const value = this.getConfigValue(symbol);
+	if (symbol === "languageIndex") {
+		return ODW.MLS.getLabel(value);
+	} else {
+		return ODW_MLS_Window_Options_statusText.apply(this, arguments);
+	}
+};
+
+const ODW_MLS_Window_Options_processOk = Window_Options.prototype.processOk;
+Window_Options.prototype.processOk = function() {
+	const index = this.index();
+    const symbol = this.commandSymbol(index);
+	if (symbol === "languageIndex") {
+		this.changeValue(symbol, ODW.MLS.getNextIndex());
+		this.refreshLanguage();
+	} else {
+		ODW_MLS_Window_Options_processOk.apply(this);
+	}
+};
+
+const ODW_MLS_Window_Options_cursorRight = Window_Options.prototype.cursorRight;
+Window_Options.prototype.cursorRight = function() {
+    const index = this.index();
+    const symbol = this.commandSymbol(index);
+	if (symbol === "languageIndex") {
+		this.changeValue(symbol, ODW.MLS.getNextIndex());
+		this.refreshLanguage();
+	} else {
+		ODW_MLS_Window_Options_cursorRight.apply(this);
+	}
+};
+
+const ODW_MLS_Window_Options_cursorLeft = Window_Options.prototype.cursorLeft;
+Window_Options.prototype.cursorLeft = function() {
+    const index = this.index();
+    const symbol = this.commandSymbol(index);
+	if (symbol === "languageIndex") {
+		this.changeValue(symbol, ODW.MLS.getPrevIndex());
+		this.refreshLanguage();
+	} else {
+		ODW_MLS_Window_Options_cursorLeft.apply(this);
+	}
+};
+
+Window_Options.prototype.refreshLanguage = function() {
+	ODW.MLS.loadDatabase();
+	setTimeout(function(){
+		ODW.MLS.updateGameTitle();
+		if (SceneManager._scene._optionsWindow) {
+			SceneManager._scene._optionsWindow.refresh();
+		}
+		if (ODW.MLS.isCompatibleWithVisuMZOptionsCore()) {
+			if (SceneManager._scene._categoryWindow) {
+				SceneManager._scene._categoryWindow.refresh();
+			}
+			if (SceneManager._scene._helpWindow) {
+				SceneManager._scene._helpWindow.refresh();
+			}
+		}
+	}, 100);
+};
+
+
+
