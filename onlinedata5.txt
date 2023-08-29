@@ -4,7 +4,7 @@ Me gusta el amor que hay entre nosotros. <br>
 
 Si la verdad que es algo tan bonito... <br>
 
-y bueno, asi es la vida \color[#4b81de] jajaja. <br>
+y bueno, asi es la vida \color[#4b81de] jajaja. \color[#ffffff]<br>
 
 Bueno, dime \localparty[1, name]
 
