@@ -1,0 +1,16 @@
+This is an  \color[#1bff17] Online Text From  \color[#ff6bf5] GitHub<br> \color[#ffffff]
+
+You can use your own URL obviusly xD
+
+We can use local commands for example:
+
+- \color[#21ffff] Variable #2 ingame: \localvariable[2] \color[#ffffff] <br>
+-  My Main Character is:  \color[#61c0ff]  \localstat[1, name] 
+
+
+
+ \color[#ffffff] 
+
+Too much text? 
+
+You can scroll the text with the arrows!! :D
