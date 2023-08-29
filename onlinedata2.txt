@@ -1,13 +1,13 @@
-Este es un texto.
+Este es un texto. <br>
 
-Me gusta el amor que hay entre nosotros.
+Me gusta el amor que hay entre nosotros. <br>
 
-Si la verdad que es algo tan bonito...
+Si la verdad que es algo tan bonito... <br>
 
-y bueno, asi es la vida jajaja.
+y bueno, asi es la vida jajaja. <br>
 
-Nada, te quiero mucho cuidado ehh...
-
-
-
+Nada, te quiero mucho cuidado ehh... <br>
+<br>
+<br>
+<br>
 Bueno... Basta
