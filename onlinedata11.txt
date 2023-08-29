@@ -1,6 +1,6 @@
 This is an  \color[#1bff17] Online Text From  \color[#ff6bf5] GitHub<br> \color[#ffffff]
 
-You can use your own URL obviusly xD
+You can use your own URL obviously xD
 
 We can use local commands for example:
 
