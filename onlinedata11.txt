@@ -5,7 +5,7 @@ You can use your own URL obviusly xD
 We can use local commands for example:
 
 - \color[#21ffff] Variable #2 ingame: \localvariable[2] \color[#ffffff] <br>
--  My Main Character is:  \color[#61c0ff]  \localstat[1, name] 
+-  My Main Character is:  \color[#61c0ff]  \localparty[1, name] 
 
 
 
