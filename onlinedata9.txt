@@ -6,7 +6,7 @@ Si la verdad que es algo tan bonito... <br>
 
 y bueno, asi es la vida \color[#4b81de] jajaja.<br>
 
-Bueno, dime \localparty[1, name]
+Bueno, dime  \color[#1bff17] \localparty[1, name] \color[#4b81de]
 
 
 
@@ -14,7 +14,7 @@ Nada, te quiero mucho cuidado ehh... <br>
 <br>
 <br>
 <br>
-Bueno... Basta
+Bueno... Basta \color[#ffffff]
 <br>
 <br>
 A mi no me vas a decir basta.  \localvariable[2] ¿Ok? Mirá que te rompo todo
