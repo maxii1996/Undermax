@@ -4,7 +4,11 @@ Me gusta el amor que hay entre nosotros. <br>
 
 Si la verdad que es algo tan bonito... <br>
 
-y bueno, asi es la vida jajaja. <br>
+y bueno, asi es la vida \color[#4b81de] jajaja. <br>
+
+Bueno, dime \localparty[1, name]
+
+
 
 Nada, te quiero mucho cuidado ehh... <br>
 <br>
@@ -13,7 +17,7 @@ Nada, te quiero mucho cuidado ehh... <br>
 Bueno... Basta
 <br>
 <br>
-A mi no me vas a decir basta. ¿Ok? Mirá que te rompo todo
+A mi no me vas a decir basta.  \localvariable[2] ¿Ok? Mirá que te rompo todo
 
 <br>
 <br>
