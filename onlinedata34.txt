@@ -11,7 +11,7 @@ You can use your own URL obviously xD
 We can use local commands for example:
 
 
-\onlineimage["https://i.pinimg.com/originals/93/47/20/9347209558591a02705e572f5b4f4f39.png", -40, 0, 20%, 20%]
+\onlineimage["https://www.designbust.com/download/570/png/microsoft_logo_icon256.png", -40, 0, 50%, 50%]
 
 
 
