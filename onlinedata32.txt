@@ -11,7 +11,7 @@ You can use your own URL obviously xD
 We can use local commands for example:
 
 
-\onlineimage["https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Microsoft_logo.svg/2048px-Microsoft_logo.svg.png"]
+\onlineimage["https://i.pinimg.com/originals/93/47/20/9347209558591a02705e572f5b4f4f39.png", -40, 0, 20%, 20%]
 
 
 
