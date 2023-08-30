@@ -1,5 +1,5 @@
 <line>
-<left> PAGINA 1 </left>
+<right> PAGINA 1 </right>
 <hr>
 
 This is an  \color[#1bff17] Online Text From  \color[#ff6bf5] GitHub<br> \color[#ffffff]
