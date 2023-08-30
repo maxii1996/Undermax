@@ -9,14 +9,10 @@ You can use your own URL obviously xD
 \fs[33]Now you can use icons too: \localicon[87] \fs[22]
 
 We can use local  Este es un texto con un margen de <margin:250> 50 píxeles a la izquierda.</margin>
+
  commands for example:
 
-
-\onlineimage["https://i.gifer.com/U1m2.gif", 140, 0, 50%, 50%]
-
-
-
-- \color[#21ffff] <margin:250> Variable #2 ingame: \localvariable[2] </margin> \color[#ffffff] <br>
+- \color[#21ffff] <margin:-50> Variable #2 ingame: \localvariable[2] </margin> \color[#ffffff] <br>
 
 
 <line>
