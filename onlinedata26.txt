@@ -24,6 +24,7 @@ We can use local commands for example:
 \localimage["img\pictures\Actor1_2.png"]
 
 
+
  \color[#ffffff] 
 
 Too much text? 
