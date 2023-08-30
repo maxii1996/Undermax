@@ -8,7 +8,7 @@ We can use local commands for example:
 
 
 - \color[#21ffff] Variable #2 ingame: \localvariable[2] \color[#ffffff] <br>
--  My Main Character is:  \color[#61c0ff]  \localparty[1, class], \color[#890ddb]  Nivel: \localparty[1, level], \color[#ffffff ]Para subir: \localparty[1, nextlvlexp]
+-  My Main Character is:  \color[#61c0ff]  \localparty[1, class], \color[#890ddb]  Nivel: \localparty[1, level], \color[#ffffff]Para subir: \localparty[1, nextlvlexp]
 
 
 
