@@ -6,6 +6,8 @@ You can use your own URL obviously xD
 
 We can use local commands for example:
 
+\localparty[1, face] 
+
 - \color[#21ffff] Variable #2 ingame: \localvariable[2] \color[#ffffff] <br>
 -  My Main Character is:  \color[#61c0ff]  \localparty[1, name] 
 
