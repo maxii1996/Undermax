@@ -12,7 +12,7 @@ We can use local  Este es un texto con un margen de <margin:250> 50 píxeles a l
 
  commands for example:
 
-- \color[#21ffff] <margin:-50> Variable #2 ingame: \localvariable[2] </margin> \color[#ffffff] <br>
+- \color[#21ffff] <margin:50> Variable #2 ingame: \localvariable[2] </margin> \color[#ffffff] <br>
 
 
 <line>
