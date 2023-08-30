@@ -13,8 +13,6 @@ We can use local commands for example:
 
 - \color[#21ffff] Variable #2 ingame: \localvariable[2] \color[#ffffff] <br>
 
-<line>
-<hr>
 
 <line>
 PAGINA 2
