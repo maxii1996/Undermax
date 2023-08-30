@@ -11,6 +11,10 @@ You can use your own URL obviously xD
 We can use local commands for example:
 
 
+\onlineimage["https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Microsoft_logo.svg/2048px-Microsoft_logo.svg.png"]
+
+
+
 - \color[#21ffff] Variable #2 ingame: \localvariable[2] \color[#ffffff] <br>
 
 
