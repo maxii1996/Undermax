@@ -1,4 +1,0 @@
-
-- \color[#21ffff] <margin:50> Variable #2 \color[#b716f2]  ingame:
-
-\localvariable[2]  \color[#ffffff] </margin>

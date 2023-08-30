@@ -1,0 +1,4 @@
+
+-- <margin:150> \color[#1672f2] Variable #3 \color[#b716f2]  ingame:
+
+\localvariable[3]  \color[#ffffff] </margin>
