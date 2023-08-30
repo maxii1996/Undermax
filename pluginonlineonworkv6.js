@@ -71,8 +71,6 @@ let menuReactivationDelay = 0;
 let pendingSwitches = [];
 
 
-
-
 (() => {
     const parameters = PluginManager.parameters("OnlineTextMZ");
     const loadingText = String(parameters["loadingText"] || "Fetching information from the server, please wait...");
@@ -104,8 +102,6 @@ let pendingSwitches = [];
             return '';
         }
     };
-
-  
 
 
     ColorManager.rgb = function(r, g, b) {
@@ -160,7 +156,7 @@ let pendingSwitches = [];
             const arrPath = /^\["(.*?)"(?:,(\s?-?\d+%?),(\s?-?\d+%?),(\s?-?\d+%?),(\s?-?\d+%?))?\]/.exec(textState.text.slice(textState.index));
             if (arrPath) {
                 textState.index += arrPath[0].length;
-                return arrPath.slice(1).filter(Boolean); // Filtra los valores undefined
+                return arrPath.slice(1).filter(Boolean); 
             }
         }
         return '';
@@ -176,7 +172,7 @@ let pendingSwitches = [];
     
         const bitmap = ImageManager.loadOnlineImage(url);
         
-        // Si se especifica un porcentaje, ajusta el ancho y alto
+      
         if (typeof params[3] === 'string' && params[3].endsWith('%')) {
             width = bitmap.width * (parseInt(params[3]) / 100);
         } else {
@@ -198,7 +194,7 @@ let pendingSwitches = [];
     ImageManager.loadOnlineImage = function(url) {
         const bitmap = new Bitmap();
         bitmap._image = new Image();
-        bitmap._image.crossOrigin = "Anonymous"; // Esto es necesario para evitar problemas de CORS al cargar imágenes de diferentes dominios
+        bitmap._image.crossOrigin = "Anonymous"; 
         bitmap._image.src = url;
         bitmap._image.onload = function() {
             bitmap.resize(bitmap._image.width, bitmap._image.height);
@@ -219,7 +215,6 @@ let pendingSwitches = [];
     
         const bitmap = ImageManager.loadPicture(filename);
         
-        // Si se especifica un porcentaje, ajusta el ancho y alto
         if (typeof params[3] === 'string' && params[3].endsWith('%')) {
             width = bitmap.width * (parseInt(params[3]) / 100);
         } else {
@@ -364,39 +359,83 @@ let pendingSwitches = [];
             this.resetFontSettings();
         }
 
-        drawTextEx(text, x, y) {
+        async drawTextEx(text, x, y) {
             if (text) {
                 const lines = text.split('\n');
                 let newY = y;
-    
+        
                 for (let line of lines) {
-                    let newX = x;
-    
-                    if (line.includes("<center>") && line.includes("</center>")) {
-                        const centeredText = line.match(/<center>(.*?)<\/center>/)[1];
-                        newX = (this.contentsWidth() - this.textWidth(centeredText)) / 2;
-                        line = line.replace(`<center>${centeredText}</center>`, centeredText);
-                    } else if (line.includes("<right>") && line.includes("</right>")) {
-                        const rightText = line.match(/<right>(.*?)<\/right>/)[1];
-                        newX = this.contentsWidth() - this.textWidth(rightText);
-                        line = line.replace(`<right>${rightText}</right>`, rightText);
-                    } else if (line.includes("<left>") && line.includes("</left>")) {
-                        const leftText = line.match(/<left>(.*?)<\/left>/)[1];
-                        line = line.replace(`<left>${leftText}</left>`, leftText);
+                    
+                    let onlineTextMatch = line.match(/\\onlinetext\("([^"]+)"\)/);
+                    if (onlineTextMatch) {
+                        let url = onlineTextMatch[1];
+                        let onlineText = await this.fetchOnlineText(url);
+                        line = line.replace(onlineTextMatch[0], onlineText);
                     }
-    
-                    const textState = this.createTextState(line, newX, newY, this.contentsWidth());
+        
+                  
+                    const { processedLine, newX } = this.processLine(line, x);
+                    const textState = this.createTextState(processedLine, newX, newY, this.contentsWidth());
                     this.processAllText(textState);
                     newY += this.lineHeight();
                 }
-    
+        
                 return this.contentsWidth();
             } else {
                 return 0;
             }
         }
-    
-    
+        
+        processLine(line, x) {
+            line = this.parseCommands(line); 
+        
+            let newX = x;
+        
+         
+            let marginMatch = line.match(/<margin:(\d+)>/);
+            let marginEndMatch = line.includes("</margin>");
+            if (marginMatch && marginEndMatch) {
+                let marginValue = parseInt(marginMatch[1]);
+                newX += marginValue;
+                line = line.replace(marginMatch[0], "").replace("</margin>", "");
+            }
+        
+            if (line.includes("<center>") && line.includes("</center>")) {
+                const centeredText = line.match(/<center>(.*?)<\/center>/)[1];
+                newX = (this.contentsWidth() - this.textWidth(centeredText)) / 2;
+                line = line.replace(`<center>${centeredText}</center>`, centeredText);
+            } else if (line.includes("<right>") && line.includes("</right>")) {
+                const rightText = line.match(/<right>(.*?)<\/right>/)[1];
+                newX = this.contentsWidth() - this.textWidth(rightText);
+                line = line.replace(`<right>${rightText}</right>`, rightText);
+            } else if (line.includes("<left>") && line.includes("</left>")) {
+                const leftText = line.match(/<left>(.*?)<\/left>/)[1];
+                line = line.replace(`<left>${leftText}</left>`, leftText);
+            }
+        
+            return { processedLine: line, newX };
+        }
+        
+        async fetchOnlineText(url) {
+            return new Promise((resolve, reject) => {
+                const xhr = new XMLHttpRequest();
+                xhr.open('GET', url);
+                xhr.onload = function() {
+                    if (xhr.status === 200) {
+                        let onlineText = xhr.responseText;
+                        onlineText = this.parseCommands(onlineText);
+                        resolve(onlineText);
+                    } else {
+                        reject(new Error('Failed to fetch online text'));
+                    }
+                }.bind(this); 
+                xhr.onerror = function() {
+                    reject(new Error('Failed to fetch online text'));
+                };
+                xhr.send();
+            });
+        }
+        
 
         processCharacter(textState) {
             if (textState.text.substring(textState.index, textState.index + 6) === "<line>" || textState.text.substring(textState.index, textState.index + 4) === "<hr>") {
@@ -546,15 +585,15 @@ let pendingSwitches = [];
                 }
                 loadingWindow.data = data;
             } else {
-                console.error('Error al cargar datos desde la URL:', url);
-                loadingWindow.data = "Error al cargar datos.";
+                console.error('Error connecting to the URL:', url);
+                loadingWindow.data = "Error fetching data.";
             }
         };
 
 
         xhr.onerror = () => {
-            console.error('Error al conectar con la URL:', url);
-            loadingWindow.data = "Error al conectar con la URL.";
+            console.error('Error connecting to the URL:', url);
+            loadingWindow.data = "Error fetching data.";
         };
         xhr.send();
     }
