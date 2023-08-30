@@ -21,7 +21,7 @@ We can use local commands for example:
 -  My Main Character is:  \color[#61c0ff]  \localparty[1, class], \color[#890ddb]  Nivel: \localparty[1, level], \color[#ffffff]Para subir: \localparty[1, nextlvlexp]
 
 
-\localimage["Actor1_2"]
+<right> \localimage["Actor1_2"] </right>
 
 
 
