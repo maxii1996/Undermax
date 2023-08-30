@@ -1,3 +1,70 @@
+/*:
+ * @target MZ
+ * @plugindesc Fetches data from a URL and displays it on screen or saves it to a variable.
+ * @author Undermax Games | Maxii1996
+ * @url https://undermax.itch.io/
+ * 
+ * @help
+ * 
+ * @command OpenOnlineTextWindow
+ * @text Open Online Text Window
+ * @desc Opens a window to display data fetched from a URL.
+ * 
+ * @param scrollLines
+ * @text Scroll Lines
+ * @desc Number of lines to scroll at once when using the arrow keys. You can use Decimals using TEXT field.
+ * @type number
+ * @min 1
+ * @default 0.2
+ * 
+ * @param windowOpacity
+ * @text Window Opacity
+ * @desc Set the opacity of the window. (0 = fully transparent, 255 = fully opaque)
+ * @type number
+ * @min 0
+ * @max 255
+ * @default 255
+ * 
+ * 
+ * 
+ * @arg url
+ * @text URL
+ * @desc The URL from which you want to fetch the data.
+ * @type string
+ * @default https://
+ * 
+ * @param loadingText
+ * @text Loading Text
+ * @desc Text displayed while fetching the data.
+ * @type string
+ * @default Fetching information from the server, please wait...
+ * 
+ * @command FetchOnlineInformation
+ * @text Fetch Online Information
+ * @desc Fetches data from a URL and saves it to a game variable.
+ * 
+ * @arg url
+ * @text URL
+ * @desc The URL from which you want to fetch the data.
+ * @type string
+ * @default https://
+ * 
+ * @arg variableId
+ * @text Save to Variable
+ * @desc ID of the game variable where you want to save the fetched data.
+ * @type variable
+ * @default 0
+ * 
+ * @arg switchId
+ * @text Data Loaded Switch
+ * @desc ID of the switch that will be turned ON once the data is successfully loaded.
+ * @type switch
+ * @default 0
+ * 
+ * 
+ */
+
+
 
 let isDataLoadingSceneActive = false;
 let menuReactivationDelay = 0;
