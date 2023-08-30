@@ -1,3 +1,7 @@
+<line>
+PAGINA 1
+<hr>
+
 This is an  \color[#1bff17] Online Text From  \color[#ff6bf5] GitHub<br> \color[#ffffff]
 
 You can use your own URL obviously xD
@@ -12,6 +16,9 @@ We can use local commands for example:
 <line>
 <hr>
 
+<line>
+PAGINA 2
+<hr>
 
 -  My Main Character is:  \color[#61c0ff]  \localparty[1, class], \color[#890ddb]  Nivel: \localparty[1, level], \color[#ffffff]Para subir: \localparty[1, nextlvlexp]
 
