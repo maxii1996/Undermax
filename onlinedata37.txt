@@ -8,7 +8,8 @@ You can use your own URL obviously xD
 
 \fs[33]Now you can use icons too: \localicon[87] \fs[22]
 
-We can use local commands for example:
+We can use local <margin: 50>Este es un texto con un margen de 50 píxeles a la izquierda.</margin>
+ commands for example:
 
 
 \onlineimage["https://i.gifer.com/U1m2.gif", 140, 0, 50%, 50%]
