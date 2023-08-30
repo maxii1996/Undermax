@@ -70,6 +70,7 @@ let pendingSwitches = [];
 
 
 
+
 (() => {
     const parameters = PluginManager.parameters("OnlineTextMZ");
     const loadingText = String(parameters["loadingText"] || "Fetching information from the server, please wait...");
@@ -102,6 +103,8 @@ let pendingSwitches = [];
         }
     };
 
+  
+
 
     ColorManager.rgb = function(r, g, b) {
         return 'rgb(' + r + ',' + g + ',' + b + ')';
@@ -131,21 +134,108 @@ let pendingSwitches = [];
                 const fontSize = this.obtainEscapeParam(textState);
                 this.contents.fontSize = fontSize;
                 break;
+            case 'LOCALIMAGE':
+                const imagePath = this.obtainEscapeParam(textState);
+                this.processLocalImage(textState, imagePath);
+                break;
+            case 'ONLINEIMAGE':
+                 const onlineParams = this.obtainEscapeParam(textState);
+                 this.processOnlineImage(textState, onlineParams);
+                 break;
+
             default:
                 _originalProcessEscapeCharacter.call(this, code, textState);
                 break;
         }
     };
-
+    
     Window_Base.prototype.obtainEscapeParam = function(textState) {
         const arr = /^\[(\d+)\]/.exec(textState.text.slice(textState.index));
         if (arr) {
             textState.index += arr[0].length;
             return parseInt(arr[1]);
         } else {
-            return '';
+            const arrPath = /^\["(.*?)"(?:,(\s?-?\d+%?),(\s?-?\d+%?),(\s?-?\d+%?),(\s?-?\d+%?))?\]/.exec(textState.text.slice(textState.index));
+            if (arrPath) {
+                textState.index += arrPath[0].length;
+                return arrPath.slice(1).filter(Boolean); // Filtra los valores undefined
+            }
         }
+        return '';
     };
+
+
+    Window_Base.prototype.processOnlineImage = function(textState, params) {
+        const url = params[0];
+        const paddingX = params[1] ? parseInt(params[1]) : 0;
+        const paddingY = params[2] ? parseInt(params[2]) : 0;
+        let width = params[3] ? parseInt(params[3]) : null;
+        let height = params[4] ? parseInt(params[4]) : null;
+    
+        const bitmap = ImageManager.loadOnlineImage(url);
+        
+        // Si se especifica un porcentaje, ajusta el ancho y alto
+        if (typeof params[3] === 'string' && params[3].endsWith('%')) {
+            width = bitmap.width * (parseInt(params[3]) / 100);
+        } else {
+            width = width || bitmap.width;
+        }
+        
+        if (typeof params[4] === 'string' && params[4].endsWith('%')) {
+            height = bitmap.height * (parseInt(params[4]) / 100);
+        } else {
+            height = height || bitmap.height;
+        }
+    
+        this.contents.blt(bitmap, 0, 0, bitmap.width, bitmap.height, textState.x + paddingX, textState.y + paddingY, width, height);
+        textState.x += width + paddingX;
+    };
+
+    
+    
+    ImageManager.loadOnlineImage = function(url) {
+        const bitmap = new Bitmap();
+        bitmap._image = new Image();
+        bitmap._image.crossOrigin = "Anonymous"; // Esto es necesario para evitar problemas de CORS al cargar imágenes de diferentes dominios
+        bitmap._image.src = url;
+        bitmap._image.onload = function() {
+            bitmap.resize(bitmap._image.width, bitmap._image.height);
+            bitmap._loadListeners.forEach(function(listener) {
+                listener();
+            });
+        };
+        return bitmap;
+    };
+    
+    
+    Window_Base.prototype.processLocalImage = function(textState, params) {
+        const filename = params[0];
+        const paddingX = params[1] ? parseInt(params[1]) : 0;
+        const paddingY = params[2] ? parseInt(params[2]) : 0;
+        let width = params[3] ? parseInt(params[3]) : null;
+        let height = params[4] ? parseInt(params[4]) : null;
+    
+        const bitmap = ImageManager.loadPicture(filename);
+        
+        // Si se especifica un porcentaje, ajusta el ancho y alto
+        if (typeof params[3] === 'string' && params[3].endsWith('%')) {
+            width = bitmap.width * (parseInt(params[3]) / 100);
+        } else {
+            width = width || bitmap.width;
+        }
+        
+        if (typeof params[4] === 'string' && params[4].endsWith('%')) {
+            height = bitmap.height * (parseInt(params[4]) / 100);
+        } else {
+            height = height || bitmap.height;
+        }
+    
+        this.contents.blt(bitmap, 0, 0, bitmap.width, bitmap.height, textState.x + paddingX, textState.y + paddingY, width, height);
+        textState.x += width + paddingX;
+    };
+    
+    
+    
 
     Window_Base.prototype.obtainRgbEscapeParam = function(textState) {
         const arr = /^\[(\d+),(\d+),(\d+)\]/.exec(textState.text.slice(textState.index));
