@@ -17,6 +17,15 @@
  * @min 1
  * @default 0.2
  * 
+ * @param windowOpacity
+ * @text Window Opacity
+ * @desc Set the opacity of the window. (0 = fully transparent, 255 = fully opaque)
+ * @type number
+ * @min 0
+ * @max 255
+ * @default 255
+ * 
+ * 
  * 
  * @arg url
  * @text URL
@@ -174,6 +183,7 @@ let pendingSwitches = [];
     constructor(rect) {
         super(rect);
         this._data = null;
+        this.opacity = Number(PluginManager.parameters('OnlineTextMZ')['windowOpacity'] || 255);
         this._textHeight = 0;
         this._scrollY = 0;
         this._isLoading = true; 
@@ -264,13 +274,37 @@ let pendingSwitches = [];
 
         drawTextEx(text, x, y) {
             if (text) {
-                const textState = this.createTextState(text, x, y, this.contentsWidth());
-                this.processAllText(textState);
-                return textState.outputWidth;
+                const lines = text.split('\n');
+                let newY = y;
+    
+                for (let line of lines) {
+                    let newX = x;
+    
+                    if (line.includes("<center>") && line.includes("</center>")) {
+                        const centeredText = line.match(/<center>(.*?)<\/center>/)[1];
+                        newX = (this.contentsWidth() - this.textWidth(centeredText)) / 2;
+                        line = line.replace(`<center>${centeredText}</center>`, centeredText);
+                    } else if (line.includes("<right>") && line.includes("</right>")) {
+                        const rightText = line.match(/<right>(.*?)<\/right>/)[1];
+                        newX = this.contentsWidth() - this.textWidth(rightText);
+                        line = line.replace(`<right>${rightText}</right>`, rightText);
+                    } else if (line.includes("<left>") && line.includes("</left>")) {
+                        const leftText = line.match(/<left>(.*?)<\/left>/)[1];
+                        line = line.replace(`<left>${leftText}</left>`, leftText);
+                    }
+    
+                    const textState = this.createTextState(line, newX, newY, this.contentsWidth());
+                    this.processAllText(textState);
+                    newY += this.lineHeight();
+                }
+    
+                return this.contentsWidth();
             } else {
                 return 0;
             }
         }
+    
+    
 
         processCharacter(textState) {
             if (textState.text.substring(textState.index, textState.index + 6) === "<line>" || textState.text.substring(textState.index, textState.index + 4) === "<hr>") {
