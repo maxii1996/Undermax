@@ -71,6 +71,8 @@ let pendingSwitches = [];
 
 
 
+
+
 (() => {
     const parameters = PluginManager.parameters("OnlineTextMZ");
     const loadingText = String(parameters["loadingText"] || "Fetching information from the server, please wait...");
@@ -164,16 +166,24 @@ let pendingSwitches = [];
         return '';
     };
 
+    // Crear un objeto para almacenar imágenes en caché
+const onlineImageCache = {};
 
-    Window_Base.prototype.processOnlineImage = function(textState, params) {
-        const url = params[0];
-        const paddingX = params[1] ? parseInt(params[1]) : 0;
-        const paddingY = params[2] ? parseInt(params[2]) : 0;
-        let width = params[3] ? parseInt(params[3]) : null;
-        let height = params[4] ? parseInt(params[4]) : null;
-    
-        const bitmap = ImageManager.loadOnlineImage(url);
-        
+Window_Base.prototype.processOnlineImage = function(textState, params) {
+    const url = params[0];
+    const paddingX = params[1] ? parseInt(params[1]) : 0;
+    const paddingY = params[2] ? parseInt(params[2]) : 0;
+    let width = params[3] ? parseInt(params[3]) : null;
+    let height = params[4] ? parseInt(params[4]) : null;
+
+    // Usar la imagen en caché si ya se ha cargado
+    let bitmap = onlineImageCache[url];
+    if (!bitmap) {
+        bitmap = ImageManager.loadOnlineImage(url);
+        onlineImageCache[url] = bitmap; // Almacenar la imagen en caché
+    }
+
+    if (bitmap.isReady()) {
         // Si se especifica un porcentaje, ajusta el ancho y alto
         if (typeof params[3] === 'string' && params[3].endsWith('%')) {
             width = bitmap.width * (parseInt(params[3]) / 100);
@@ -186,27 +196,34 @@ let pendingSwitches = [];
         } else {
             height = height || bitmap.height;
         }
-    
+
         this.contents.blt(bitmap, 0, 0, bitmap.width, bitmap.height, textState.x + paddingX, textState.y + paddingY, width, height);
         textState.x += width + paddingX;
+    }
+};
+
+ImageManager.loadOnlineImage = function(url) {
+    // Si la imagen ya está en caché, simplemente devuélvela
+    if (onlineImageCache[url]) {
+        return onlineImageCache[url];
+    }
+
+    const bitmap = new Bitmap();
+    bitmap._image = new Image();
+    bitmap._image.crossOrigin = "Anonymous"; // Esto es necesario para evitar problemas de CORS al cargar imágenes de diferentes dominios
+    bitmap._image.src = url;
+    bitmap._image.onload = function() {
+        bitmap.resize(bitmap._image.width, bitmap._image.height);
+        bitmap._loadListeners.forEach(function(listener) {
+            listener();
+        });
     };
+    return bitmap;
+};
 
     
-    
-    ImageManager.loadOnlineImage = function(url) {
-        const bitmap = new Bitmap();
-        bitmap._image = new Image();
-        bitmap._image.crossOrigin = "Anonymous"; // Esto es necesario para evitar problemas de CORS al cargar imágenes de diferentes dominios
-        bitmap._image.src = url;
-        bitmap._image.onload = function() {
-            bitmap.resize(bitmap._image.width, bitmap._image.height);
-            bitmap._loadListeners.forEach(function(listener) {
-                listener();
-            });
-        };
-        return bitmap;
-    };
-    
+
+
     
     Window_Base.prototype.processLocalImage = function(textState, params) {
         const filename = params[0];
