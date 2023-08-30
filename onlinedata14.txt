@@ -2,6 +2,8 @@ This is an  \color[#1bff17] Online Text From  \color[#ff6bf5] GitHub<br> \color[
 
 You can use your own URL obviously xD
 
+\fs[33]Now you can use icons too: \localicon[87] \fs[22]
+
 We can use local commands for example:
 
 - \color[#21ffff] Variable #2 ingame: \localvariable[2] \color[#ffffff] <br>
