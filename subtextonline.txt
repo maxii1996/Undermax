@@ -1,1 +1,1 @@
-THIS IS A SUBTEXT ONLINE
+- \color[#21ffff] <margin:50> Variable #2 ingame: \localvariable[2] </margin> \color[#ffffff] <br>
