@@ -1,74 +1,7 @@
-/*:
- * @target MZ
- * @plugindesc Fetches data from a URL and displays it on screen or saves it to a variable.
- * @author Undermax Games | Maxii1996
- * @url https://undermax.itch.io/
- * 
- * @help
- * 
- * @command OpenOnlineTextWindow
- * @text Open Online Text Window
- * @desc Opens a window to display data fetched from a URL.
- * 
- * @param scrollLines
- * @text Scroll Lines
- * @desc Number of lines to scroll at once when using the arrow keys. You can use Decimals using TEXT field.
- * @type number
- * @min 1
- * @default 0.2
- * 
- * @param windowOpacity
- * @text Window Opacity
- * @desc Set the opacity of the window. (0 = fully transparent, 255 = fully opaque)
- * @type number
- * @min 0
- * @max 255
- * @default 255
- * 
- * 
- * 
- * @arg url
- * @text URL
- * @desc The URL from which you want to fetch the data.
- * @type string
- * @default https://
- * 
- * @param loadingText
- * @text Loading Text
- * @desc Text displayed while fetching the data.
- * @type string
- * @default Fetching information from the server, please wait...
- * 
- * @command FetchOnlineInformation
- * @text Fetch Online Information
- * @desc Fetches data from a URL and saves it to a game variable.
- * 
- * @arg url
- * @text URL
- * @desc The URL from which you want to fetch the data.
- * @type string
- * @default https://
- * 
- * @arg variableId
- * @text Save to Variable
- * @desc ID of the game variable where you want to save the fetched data.
- * @type variable
- * @default 0
- * 
- * @arg switchId
- * @text Data Loaded Switch
- * @desc ID of the switch that will be turned ON once the data is successfully loaded.
- * @type switch
- * @default 0
- * 
- * 
- */
 
 let isDataLoadingSceneActive = false;
 let menuReactivationDelay = 0;
 let pendingSwitches = [];
-
-
 
 
 
@@ -166,24 +99,16 @@ let pendingSwitches = [];
         return '';
     };
 
-    // Crear un objeto para almacenar imágenes en caché
-const onlineImageCache = {};
 
-Window_Base.prototype.processOnlineImage = function(textState, params) {
-    const url = params[0];
-    const paddingX = params[1] ? parseInt(params[1]) : 0;
-    const paddingY = params[2] ? parseInt(params[2]) : 0;
-    let width = params[3] ? parseInt(params[3]) : null;
-    let height = params[4] ? parseInt(params[4]) : null;
-
-    // Usar la imagen en caché si ya se ha cargado
-    let bitmap = onlineImageCache[url];
-    if (!bitmap) {
-        bitmap = ImageManager.loadOnlineImage(url);
-        onlineImageCache[url] = bitmap; // Almacenar la imagen en caché
-    }
-
-    if (bitmap.isReady()) {
+    Window_Base.prototype.processOnlineImage = function(textState, params) {
+        const url = params[0];
+        const paddingX = params[1] ? parseInt(params[1]) : 0;
+        const paddingY = params[2] ? parseInt(params[2]) : 0;
+        let width = params[3] ? parseInt(params[3]) : null;
+        let height = params[4] ? parseInt(params[4]) : null;
+    
+        const bitmap = ImageManager.loadOnlineImage(url);
+        
         // Si se especifica un porcentaje, ajusta el ancho y alto
         if (typeof params[3] === 'string' && params[3].endsWith('%')) {
             width = bitmap.width * (parseInt(params[3]) / 100);
@@ -196,34 +121,27 @@ Window_Base.prototype.processOnlineImage = function(textState, params) {
         } else {
             height = height || bitmap.height;
         }
-
+    
         this.contents.blt(bitmap, 0, 0, bitmap.width, bitmap.height, textState.x + paddingX, textState.y + paddingY, width, height);
         textState.x += width + paddingX;
-    }
-};
-
-ImageManager.loadOnlineImage = function(url) {
-    // Si la imagen ya está en caché, simplemente devuélvela
-    if (onlineImageCache[url]) {
-        return onlineImageCache[url];
-    }
-
-    const bitmap = new Bitmap();
-    bitmap._image = new Image();
-    bitmap._image.crossOrigin = "Anonymous"; // Esto es necesario para evitar problemas de CORS al cargar imágenes de diferentes dominios
-    bitmap._image.src = url;
-    bitmap._image.onload = function() {
-        bitmap.resize(bitmap._image.width, bitmap._image.height);
-        bitmap._loadListeners.forEach(function(listener) {
-            listener();
-        });
     };
-    return bitmap;
-};
 
     
-
-
+    
+    ImageManager.loadOnlineImage = function(url) {
+        const bitmap = new Bitmap();
+        bitmap._image = new Image();
+        bitmap._image.crossOrigin = "Anonymous"; // Esto es necesario para evitar problemas de CORS al cargar imágenes de diferentes dominios
+        bitmap._image.src = url;
+        bitmap._image.onload = function() {
+            bitmap.resize(bitmap._image.width, bitmap._image.height);
+            bitmap._loadListeners.forEach(function(listener) {
+                listener();
+            });
+        };
+        return bitmap;
+    };
+    
     
     Window_Base.prototype.processLocalImage = function(textState, params) {
         const filename = params[0];
