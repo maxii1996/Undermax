@@ -10,7 +10,7 @@ You can use your own URL obviously xD
 
 <margin:150> We can use local commands too!! (THIS IS A MARGIN) </margin>
 
-\onlinetext("https://raw.githubusercontent.com/maxii1996/Undermax/main/subtextonline4.txt")
+\onlinetext("https://raw.githubusercontent.com/maxii1996/Undermax/main/subtextonline5.txt")
 
 - \color[#21ffff] <margin:50> Variable #2 ingame: \localvariable[2] </margin> \color[#ffffff] <br>
 
