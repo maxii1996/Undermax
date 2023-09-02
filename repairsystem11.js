@@ -219,6 +219,22 @@ Game_Actor.prototype.performAction = function(action) {
     }
 
 
+    class Window_TotalRepairCost extends Window_Base {
+        constructor(rect, repairWindow) {
+            super(rect);
+            this._repairWindow = repairWindow;
+            this.refresh();
+        }
+    
+        refresh() {
+            this.contents.clear();
+            const totalCost = this._repairWindow._data.reduce((acc, item) => {
+                const repairCost = getRepairCost(item);
+                return acc + repairCost * (getItemDurability(item) - item.durability);
+            }, 0);
+            this.drawText($plugins.filter(p => p.description.includes("Durability System for Items"))[0].parameters.totalCostText + " " + totalCost, 0, 0, this.width - this.padding * 2, 'left');
+        }
+    }
     
 
     class Scene_Repair extends Scene_MenuBase {
@@ -242,6 +258,8 @@ Game_Actor.prototype.performAction = function(action) {
         onRepairLoaded() {
             if (this._repairWindow._data.length === 0 || this.totalRepairCost() === 0) {
                 this._commandWindow.setCommandEnabled('repair', false);
+            } else {
+                this._commandWindow.setCommandEnabled('repair', true);
             }
         }
         
@@ -297,24 +315,7 @@ Game_Actor.prototype.performAction = function(action) {
     }
 
 
-    class Window_TotalRepairCost extends Window_Base {
-        constructor(rect, repairWindow) {
-            super(rect);
-            this._repairWindow = repairWindow;
-            this.refresh();
-        }
-    
-        refresh() {
-            this.contents.clear();
-            const totalCost = this._repairWindow._data.reduce((acc, item) => {
-                const repairCost = getRepairCost(item);
-                return acc + repairCost * (getItemDurability(item) - item.durability);
-            }, 0);
-            this.drawText($plugins.filter(p => p.description.includes("Durability System for Items"))[0].parameters.totalCostText + " " + totalCost, 0, 0, this.width - this.padding * 2, 'left');
-        }
-    }
-    
-
+  
 
     PluginManager.registerCommand('DurabilitySystem', 'DecreaseDurability', args => {
         let itemId = Number(args.itemId);
