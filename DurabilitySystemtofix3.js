@@ -162,14 +162,19 @@ console.log("Durability System Plugin inicializado");
         }
 
         processOk() {
-            if (this._commandWindow) {
-                this.deactivate();
-                this._commandWindow.activate();
-                this._commandWindow.select(0); // Selecciona el botón de Reparar por defecto
+            const item = this.item();
+            if (item) {
+                // Si se selecciona un objeto, muestra la ventana de confirmación
+                this._confirmWindow.setItem(item);
+                this._confirmWindow.refresh();
+                this._confirmWindow.show();
+                this._confirmWindow.activate();
+                this._confirmWindow.select(0);
             } else {
-                super.processOk();
+                this.callOkHandler();
             }
         }
+     
         
     
         processCancel() {
@@ -366,6 +371,8 @@ console.log("Durability System Plugin inicializado");
             this.createCommandWindow();
             this.createTotalCostWindow();
             this.createConfirmWindow();
+            this._confirmWindow.deactivate();
+            this._confirmWindow.deselect();
         }
 
         update() {
@@ -453,7 +460,9 @@ console.log("Durability System Plugin inicializado");
             this._confirmWindow.setHandler('confirm', this.onConfirmOk.bind(this));
             this._confirmWindow.setHandler('cancel', this.onConfirmCancel.bind(this));
             this.addWindow(this._confirmWindow);
+            this._confirmWindow.hide();  // Añade esta línea para ocultar la ventana al inicio
         }
+        
         
 
         onConfirmOk() {
@@ -475,12 +484,14 @@ console.log("Durability System Plugin inicializado");
         onRepairOk() {
             const item = this._repairWindow.item();
             if (item) {
-                this._confirmWindow._item = item;
+                this._confirmWindow.setItem(item);
                 this._confirmWindow.refresh();
                 this._confirmWindow.show();
                 this._confirmWindow.activate();
+                this._confirmWindow.select(0);
             }
         }
+        
         
 
         commandRepair() {
@@ -522,10 +533,12 @@ console.log("Durability System Plugin inicializado");
             this._item = item;
             this.refresh();
         }
-    
+        
         makeCommandList() {
-            const cost = this._item ? this._item.repairCost : 0;
-            this.addCommand(`¿Reparar ${this._item.name} individualmente por ${cost} oro?`, 'confirm');
+            if (this._item) {  // Asegurarse de que _item esté definido
+                const cost = this._item.repairCost || 0;
+                this.addCommand(`¿Reparar ${this._item.name} individualmente por ${cost} oro?`, 'confirm');
+            }
             this.addCommand('No', 'cancel');
         }
     }
