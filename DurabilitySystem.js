@@ -170,9 +170,6 @@ Game_Actor.prototype.performAction = function(action) {
                 return (DataManager.isWeapon(item) || DataManager.isArmor(item)) &&
                        getItemDurability(item) !== -1;
             });
-
-            this.callHandler('loaded'); // Añadir esta línea al final
-
         }
         
 
@@ -219,22 +216,6 @@ Game_Actor.prototype.performAction = function(action) {
     }
 
 
-    class Window_TotalRepairCost extends Window_Base {
-        constructor(rect, repairWindow) {
-            super(rect);
-            this._repairWindow = repairWindow;
-            this.refresh();
-        }
-    
-        refresh() {
-            this.contents.clear();
-            const totalCost = this._repairWindow._data.reduce((acc, item) => {
-                const repairCost = getRepairCost(item);
-                return acc + repairCost * (getItemDurability(item) - item.durability);
-            }, 0);
-            this.drawText($plugins.filter(p => p.description.includes("Durability System for Items"))[0].parameters.totalCostText + " " + totalCost, 0, 0, this.width - this.padding * 2, 'left');
-        }
-    }
     
 
     class Scene_Repair extends Scene_MenuBase {
@@ -247,33 +228,19 @@ Game_Actor.prototype.performAction = function(action) {
         }
 
         createRepairWindow() {
-            const rect = new Rectangle(0, 0, Graphics.boxWidth, Graphics.boxHeight - 100);
+            const ww = Graphics.boxWidth * 0.6; 
+            const wh = Graphics.boxHeight * 0.6; 
+            const wx = (Graphics.boxWidth - ww) / 2; 
+            const wy = (Graphics.boxHeight - wh) / 2; 
+            const rect = new Rectangle(wx, wy, ww, wh - 100); 
             this._repairWindow = new Window_RepairList(rect);
-            this._repairWindow.setHandler('ok', this.onRepairOk.bind(this));
-            this._repairWindow.setHandler('cancel', this.onRepairCancel.bind(this));
-            this._repairWindow.setHandler('loaded', this.onRepairLoaded.bind(this));
-            
             this.addWindow(this._repairWindow);
         }
-
-        onRepairLoaded() {
-            if (this._repairWindow._data.length === 0 || this.totalRepairCost() === 0) {
-                this._commandWindow.setCommandEnabled('repair', false);
-            } else {
-                this._commandWindow.setCommandEnabled('repair', true);
-            }
-        }
-        
-        onRepairOk() {
-            this._repairWindow.activate();
-        }
-        
-        
 
         createCommandWindow() {
             const ww = Graphics.boxWidth * 0.6; 
             const wx = (Graphics.boxWidth - ww) / 2; 
-            const wy = this._repairWindow.y + this._repairWindow.height; 
+            const wy = 85 + this._repairWindow.y + this._repairWindow.height; 
             const rect = new Rectangle(wx, wy, ww, 75); 
             this._commandWindow = new Window_HorzCommand(rect);
             this._commandWindow.setHandler('repair', this.commandRepair.bind(this));
@@ -287,8 +254,8 @@ Game_Actor.prototype.performAction = function(action) {
         createTotalCostWindow() {
             const ww = Graphics.boxWidth * 0.6;
             const wx = (Graphics.boxWidth - ww) / 2;
-            const wy = this._commandWindow.y - 50; 
-            const rect = new Rectangle(wx, wy, ww, 50);
+            const wy = this._commandWindow.y - 80; 
+            const rect = new Rectangle(wx, wy, ww, 55);
             this._totalCostWindow = new Window_TotalRepairCost(rect, this._repairWindow);
             this.addWindow(this._totalCostWindow);
         }
@@ -321,7 +288,24 @@ Game_Actor.prototype.performAction = function(action) {
     }
 
 
-  
+    class Window_TotalRepairCost extends Window_Base {
+        constructor(rect, repairWindow) {
+            super(rect);
+            this._repairWindow = repairWindow;
+            this.refresh();
+        }
+    
+        refresh() {
+            this.contents.clear();
+            const totalCost = this._repairWindow._data.reduce((acc, item) => {
+                const repairCost = getRepairCost(item);
+                return acc + repairCost * (getItemDurability(item) - item.durability);
+            }, 0);
+            this.drawText($plugins.filter(p => p.description.includes("Durability System for Items"))[0].parameters.totalCostText + " " + totalCost, 0, 0, this.width - this.padding * 2, 'left');
+        }
+    }
+    
+
 
     PluginManager.registerCommand('DurabilitySystem', 'DecreaseDurability', args => {
         let itemId = Number(args.itemId);
