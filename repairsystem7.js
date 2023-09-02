@@ -24,6 +24,24 @@
  * @desc Show the repair interface.
  * 
  * 
+ * @param repairText
+ *¨@text Texto "Reparar"
+ * @desc Texto para el botón "Reparar".
+ * @default Reparar
+ *
+* @param cancelText
+* @text Texto "Cancelar"
+* @desc Texto para el botón "Cancelar".
+* @default Cancelar
+*
+* @param totalCostText
+* @text Texto "Costo Total"
+* @desc Texto para mostrar el costo total de la reparación.
+* @default Costo total de la reparación:
+
+ * 
+ * 
+ * 
  * 
  */
 console.log("Durability System Plugin inicializado");
@@ -161,7 +179,6 @@ Game_Actor.prototype.performAction = function(action) {
             const repairCost = getRepairCost(item);
             const totalCost = repairCost * (getItemDurability(item) - item.durability);
             this.drawItemName(item, rect.x, rect.y, rect.width);
-          // this.drawText(`Costo: ${totalCost}`, rect.x + 140, rect.y, rect.width, 'left');
         }
 
         refresh() {
@@ -173,9 +190,10 @@ Game_Actor.prototype.performAction = function(action) {
 
     class Window_HorzCommand extends Window_Command {
         makeCommandList() {
-            this.addCommand('Reparar', 'repair');
-            this.addCommand('Cancelar', 'cancel');
+            this.addCommand($plugins.filter(p => p.description.includes("Durability System for Items"))[0].parameters.repairText || "Reparar", 'repair');
+            this.addCommand($plugins.filter(p => p.description.includes("Durability System for Items"))[0].parameters.cancelText || "Cancelar", 'cancel');
         }
+        
     
         numVisibleRows() {
             return 1; 
@@ -192,6 +210,7 @@ Game_Actor.prototype.performAction = function(action) {
             super.create();
             this.createRepairWindow();
             this.createCommandWindow();
+            this.createTotalCostWindow();
         }
 
         createRepairWindow() {
@@ -213,7 +232,20 @@ Game_Actor.prototype.performAction = function(action) {
             this._commandWindow.setHandler('repair', this.commandRepair.bind(this));
             this._commandWindow.setHandler('cancel', this.popScene.bind(this));
             this.addWindow(this._commandWindow);
+            if (this._repairWindow._data.length === 0) {
+                this._commandWindow.setCommandEnabled('repair', false);
+            }
         }
+
+        createTotalCostWindow() {
+            const ww = Graphics.boxWidth * 0.6;
+            const wx = (Graphics.boxWidth - ww) / 2;
+            const wy = this._commandWindow.y - 50; 
+            const rect = new Rectangle(wx, wy, ww, 50);
+            this._totalCostWindow = new Window_TotalRepairCost(rect, this._repairWindow);
+            this.addWindow(this._totalCostWindow);
+        }
+        
         
 
         commandRepair() {
@@ -235,6 +267,23 @@ Game_Actor.prototype.performAction = function(action) {
     }
 
 
+    class Window_TotalRepairCost extends Window_Base {
+        constructor(rect, repairWindow) {
+            super(rect);
+            this._repairWindow = repairWindow;
+            this.refresh();
+        }
+    
+        refresh() {
+            this.contents.clear();
+            const totalCost = this._repairWindow._data.reduce((acc, item) => {
+                const repairCost = getRepairCost(item);
+                return acc + repairCost * (getItemDurability(item) - item.durability);
+            }, 0);
+            this.drawText($plugins.filter(p => p.description.includes("Durability System for Items"))[0].parameters.totalCostText + " " + totalCost, 0, 0, this.width - this.padding * 2, 'left');
+        }
+    }
+    
 
 
     PluginManager.registerCommand('DurabilitySystem', 'DecreaseDurability', args => {
