@@ -40,6 +40,13 @@ console.log("Durability System Plugin inicializado");
         return -1;
     }
 
+    function getRepairCost(item) {
+        const note = item.note;
+        const match = note.match(/<repair-cost:(\d+)>/i);
+        return match ? parseInt(match[1]) : 1;
+    }
+    
+
     function initializeDurability(item) {
         if (item && getItemDurability(item) !== -1 && (item.durability === undefined)) {
             item.durability = getItemDurability(item);
@@ -143,15 +150,20 @@ Game_Actor.prototype.performAction = function(action) {
 
         makeItemList() {
             this._data = $gameParty.allItems().filter(item => {
-                return getItemDurability(item) !== -1 && item.durability < getItemDurability(item);
+                return (DataManager.isWeapon(item) || DataManager.isArmor(item)) &&
+                       getItemDurability(item) !== -1 && 
+                       item.durability < getItemDurability(item);
             });
         }
 
         drawItem(index) {
             const item = this._data[index];
             const rect = this.itemRect(index);
+            const repairCost = getRepairCost(item);
+            const totalCost = repairCost * (getItemDurability(item) - item.durability);
             this.drawItemName(item, rect.x, rect.y, rect.width);
-            this.drawText(`Durabilidad ${item.durability}/${getItemDurability(item)}`, rect.x, rect.y, rect.width, 'right');
+            this.drawText(`Durabilidad ${item.durability}/${getItemDurability(item)}`, rect.x + 200, rect.y, rect.width, 'left');
+            this.drawText(`Costo: ${totalCost}`, rect.x + 400, rect.y, rect.width, 'left');
         }
 
         refresh() {
@@ -186,11 +198,12 @@ Game_Actor.prototype.performAction = function(action) {
         }
 
         commandRepair() {
-            const cost = this._repairWindow._data.reduce((acc, item) => {
-                return acc + (getItemDurability(item) - item.durability);
+            const totalCost = this._repairWindow._data.reduce((acc, item) => {
+                const repairCost = getRepairCost(item);
+                return acc + repairCost * (getItemDurability(item) - item.durability);
             }, 0);
-            if ($gameParty.gold() >= cost) {
-                $gameParty.loseGold(cost);
+            if ($gameParty.gold() >= totalCost) {
+                $gameParty.loseGold(totalCost);
                 this._repairWindow._data.forEach(item => {
                     item.durability = getItemDurability(item);
                 });
@@ -200,7 +213,6 @@ Game_Actor.prototype.performAction = function(action) {
             }
         }
     }
-
 
 
 
