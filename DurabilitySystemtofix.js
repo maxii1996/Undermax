@@ -162,20 +162,27 @@ console.log("Durability System Plugin inicializado");
         }
 
         processOk() {
-            super.processOk();
             if (this._commandWindow) {
                 this.deactivate();
                 this._commandWindow.activate();
+                this._commandWindow.select(0); // Selecciona el botón de Reparar por defecto
+            } else {
+                super.processOk();
             }
         }
-
+        
+    
         processCancel() {
-            super.processCancel();
             if (this._commandWindow) {
                 this.deactivate();
                 this._commandWindow.activate();
+                this._commandWindow.select(1); // Selecciona el botón de Cancelar por defecto
+            } else {
+                super.processCancel();
             }
         }
+        
+    
 
         isBottomRow() {
             return this.index() >= (this.maxItems() - this.maxCols());
