@@ -170,6 +170,9 @@ Game_Actor.prototype.performAction = function(action) {
                 return (DataManager.isWeapon(item) || DataManager.isArmor(item)) &&
                        getItemDurability(item) !== -1;
             });
+
+            this.callHandler('loaded'); // Añadir esta línea al final
+
         }
         
 
@@ -228,14 +231,20 @@ Game_Actor.prototype.performAction = function(action) {
         }
 
         createRepairWindow() {
-            const ww = Graphics.boxWidth * 0.6; 
-            const wh = Graphics.boxHeight * 0.6; 
-            const wx = (Graphics.boxWidth - ww) / 2; 
-            const wy = (Graphics.boxHeight - wh) / 2; 
-            const rect = new Rectangle(wx, wy, ww, wh - 100); 
-            this._repairWindow = new Window_RepairList(rect);
+            const rect = new Rectangle(0, 0, Graphics.boxWidth, Graphics.boxHeight - 100);
+            this._repairWindow = new Window_Repair(rect);
+            this._repairWindow.setHandler('ok', this.onRepairOk.bind(this));
+            this._repairWindow.setHandler('cancel', this.onRepairCancel.bind(this));
+            this._repairWindow.setHandler('loaded', this.onRepairLoaded.bind(this)); // Añadir esta línea
             this.addWindow(this._repairWindow);
         }
+
+        onRepairLoaded() {
+            if (this._repairWindow._data.length === 0 || this.totalRepairCost() === 0) {
+                this._commandWindow.setCommandEnabled('repair', false);
+            }
+        }
+        
 
         createCommandWindow() {
             const ww = Graphics.boxWidth * 0.6; 
