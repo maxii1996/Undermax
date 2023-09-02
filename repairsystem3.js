@@ -18,40 +18,15 @@
  * @text Amount
  * @desc Amount to decrease the item's durability by.
  * 
- * @command RepairItem
- * @text Repair Item
- * @desc Repair an item, weapon, or armor.
  * 
- * @arg itemType
- * @type select
- * @text Type
- * @desc Type of item to be repaired.
- * @option Item
- * @value item
- * @option Weapon
- * @value weapon
- * @option Armor
- * @value armor
- * 
- * @arg itemId
- * @type number
- * @text ID
- * @desc ID of the item, weapon, or armor to be repaired.
- * 
- * @arg repairCost
- * @type number
- * @text Repair Cost
- * @desc Cost per durability point to repair.
- * 
- * 
- *  @command ShowRepairScene
+ * @command ShowRepairScene
  * @text Show Repair Scene
  * @desc Show the repair interface.
  * 
-
  * 
  * 
  */
+console.log("Durability System Plugin inicializado");
 
 (() => {
 
@@ -151,6 +126,8 @@ Game_Actor.prototype.performAction = function(action) {
     
     class Window_RepairList extends Window_Selectable {
         constructor(rect) {
+            console.log("Intentando crear la ventana de reparación...");
+
             super(rect);
             this._data = [];
             this.refresh();
@@ -185,7 +162,10 @@ Game_Actor.prototype.performAction = function(action) {
     }
 
     class Scene_Repair extends Scene_MenuBase {
+        
         create() {
+            console.log("Intentando cargar la escena de reparación...");
+
             super.create();
             this.createRepairWindow();
             this.createCommandWindow();
@@ -216,7 +196,6 @@ Game_Actor.prototype.performAction = function(action) {
                 });
                 this._repairWindow.refresh();
             } else {
-                // Mostrar mensaje de oro insuficiente
                 $gameMessage.add("No tienes suficiente oro para reparar los ítems.");
             }
         }
@@ -262,5 +241,11 @@ Game_Actor.prototype.performAction = function(action) {
             item.durability = getItemDurability(item);
         }
     });
+
+    PluginManager.registerCommand('DurabilitySystem', 'ShowRepairScene', args => {
+        SceneManager.push(Scene_Repair);
+    });
+    
+    
 
 })();
