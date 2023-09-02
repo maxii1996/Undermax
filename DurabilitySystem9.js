@@ -154,13 +154,27 @@ console.log("Durability System Plugin inicializado");
         }
     };
 
-
-
     class Window_RepairList extends Window_Selectable {
         constructor(rect) {
             super(rect);
             this._data = [];
             this.refresh();
+        }
+
+        processOk() {
+            super.processOk();
+            if (this._commandWindow) {
+                this.deactivate();
+                this._commandWindow.activate();
+            }
+        }
+
+        processCancel() {
+            super.processCancel();
+            if (this._commandWindow) {
+                this.deactivate();
+                this._commandWindow.activate();
+            }
         }
 
         isBottomRow() {
@@ -187,25 +201,20 @@ console.log("Durability System Plugin inicializado");
 
         cursorDown(wrap) {
             console.log("Intentando desplazarse hacia abajo...");
-
             if (this.index() < this.maxItems() - 1) {
-                super.cursorDown(wrap);
-            } else {
-                this.select(0);
+                super.cursorDown(false);
             }
             this.ensureCursorVisible();
         }
 
         cursorUp(wrap) {
             console.log("Intentando desplazarse hacia arriba...");
-
             if (this.index() > 0) {
-                super.cursorUp(wrap);
-            } else {
-                this.select(this.maxItems() - 1);
+                super.cursorUp(false);
             }
             this.ensureCursorVisible();
         }
+
 
         visibleRows() {
             return 5;
@@ -255,9 +264,7 @@ console.log("Durability System Plugin inicializado");
         }
     }
 
-
     class Window_HorzCommand extends Window_Command {
-
 
         setCommandEnabled(commandName, enabled) {
             const command = this._list.find(cmd => cmd.symbol === commandName);
@@ -278,11 +285,11 @@ console.log("Durability System Plugin inicializado");
         processCursorMove() {
             if (this.isCursorMovable()) {
                 const lastIndex = this.index();
-                if (Input.isTriggered('up') && this._repairWindow) {
+                if (Input.isTriggered('up') && this._repairWindow && this._repairWindow.maxItems() > 0) {
                     this.deactivate();
                     this._repairWindow.activate();
                     this._repairWindow.select(this._repairWindow.maxItems() - 1);
-                } else if (Input.isTriggered('down') && this._repairWindow) {
+                } else if (Input.isTriggered('down') && this._repairWindow && this._repairWindow.maxItems() > 0) {
                     this.deactivate();
                     this._repairWindow.activate();
                     this._repairWindow.select(0);
@@ -291,7 +298,6 @@ console.log("Durability System Plugin inicializado");
                 }
             }
         }
-
 
 
         makeCommandList() {
@@ -306,42 +312,35 @@ console.log("Durability System Plugin inicializado");
             }
         }
 
-
-
-
         isRepairEnabled() {
             console.log("Verificando si el botón de reparar está habilitado...");
-        
+
             if (!this._repairWindow || !this._repairWindow._data) {
                 console.log("El _repairWindow no está definido o no tiene datos.");
                 return false;
             }
-        
+
             const totalCost = this._repairWindow._data.reduce((acc, item) => {
                 const repairCost = getRepairCost(item);
                 return acc + repairCost * (getItemDurability(item) - item.durability);
             }, 0);
-            
+
             console.log("Costo total de reparación:", totalCost);
             console.log("Oro del jugador:", $gameParty.gold());
-        
+
             const hasItemsToRepair = $gameParty.allItems().some(item => {
-                return (DataManager.isWeapon(item) || DataManager.isArmor(item)) && 
-                item.durability !== undefined && 
-                item.durability < getItemDurability(item);
+                return (DataManager.isWeapon(item) || DataManager.isArmor(item)) &&
+                    item.durability !== undefined &&
+                    item.durability < getItemDurability(item);
             });
-        
+
             console.log("¿Hay ítems para reparar?", hasItemsToRepair);
-        
+
             const canAfford = $gameParty.gold() >= totalCost;
             console.log("¿El jugador puede pagar?", canAfford);
-        
+
             return hasItemsToRepair && canAfford;
         }
-        
-
-
-
 
         numVisibleRows() {
             return 1;
@@ -352,21 +351,26 @@ console.log("Durability System Plugin inicializado");
         }
     }
 
-
-
     class Scene_Repair extends Scene_MenuBase {
-
-
 
         create() {
             super.create();
             this.createRepairWindow();
             this.createCommandWindow();
-            this.createTotalCostWindow(); // Asegúrate de que esto se llame
+            this.createTotalCostWindow();
         }
-        
 
-
+        update() {
+            super.update();
+            if (Input.isTriggered('cancel')) {
+                this.popScene();
+            } else if (Input.isTriggered('left') || Input.isTriggered('right')) {
+                if (!this._commandWindow.active) {
+                    this._commandWindow.activate();
+                    this._repairWindow.deactivate();
+                }
+            }
+        }
 
         createRepairWindow() {
             const ww = Graphics.boxWidth * 0.75;
@@ -375,6 +379,8 @@ console.log("Durability System Plugin inicializado");
             const wy = (Graphics.boxHeight - wh) / 2;
             const rect = new Rectangle(wx, wy, ww, wh - 120);
             this._repairWindow = new Window_RepairList(rect);
+            this._repairWindow._commandWindow = this._commandWindow;
+
             this.addWindow(this._repairWindow);
             if (this._commandWindow) {
                 this._commandWindow._repairWindow = this._repairWindow;
@@ -390,22 +396,18 @@ console.log("Durability System Plugin inicializado");
             this._commandWindow.setHandler('repair', this.commandRepair.bind(this));
             this._commandWindow.setHandler('cancel', this.popScene.bind(this));
             this.addWindow(this._commandWindow);
-            
-            // Asegurarse de que _repairWindow esté asignado a _commandWindow
             this._commandWindow._repairWindow = this._repairWindow;
-            
-            // Refrescar _commandWindow después de asignar _repairWindow
             this._commandWindow.refresh();
-        
-            if (this._repairWindow._data.length === 0) {
+
+            if (this._repairWindow && this._repairWindow._data.length === 0) {
                 console.log("No hay ítems en _repairWindow._data");
                 this._commandWindow.setCommandEnabled('repair', false);
             } else {
                 console.log("Hay ítems en _repairWindow._data");
             }
         }
-        
-        
+
+
 
         createTotalCostWindow() {
             const ww = Graphics.boxWidth * 0.75;
@@ -522,7 +524,5 @@ console.log("Durability System Plugin inicializado");
     PluginManager.registerCommand('DurabilitySystem', 'ShowRepairScene', args => {
         SceneManager.push(Scene_Repair);
     });
-
-
 
 })();
