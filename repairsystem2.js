@@ -42,6 +42,15 @@
  * @type number
  * @text Repair Cost
  * @desc Cost per durability point to repair.
+ * 
+ * 
+ *  @command ShowRepairScene
+ * @text Show Repair Scene
+ * @desc Show the repair interface.
+ * 
+
+ * 
+ * 
  */
 
 (() => {
@@ -138,6 +147,85 @@ Game_Actor.prototype.performAction = function(action) {
         }
     };
 
+
+    
+    class Window_RepairList extends Window_Selectable {
+        constructor(rect) {
+            super(rect);
+            this._data = [];
+            this.refresh();
+        }
+
+        maxItems() {
+            return this._data.length;
+        }
+
+        item() {
+            return this._data[this.index()];
+        }
+
+        makeItemList() {
+            this._data = $gameParty.allItems().filter(item => {
+                return getItemDurability(item) !== -1 && item.durability < getItemDurability(item);
+            });
+        }
+
+        drawItem(index) {
+            const item = this._data[index];
+            const rect = this.itemRect(index);
+            this.drawItemName(item, rect.x, rect.y, rect.width);
+            this.drawText(`Durabilidad ${item.durability}/${getItemDurability(item)}`, rect.x, rect.y, rect.width, 'right');
+        }
+
+        refresh() {
+            this.makeItemList();
+            this.createContents();
+            this.drawAllItems();
+        }
+    }
+
+    class Scene_Repair extends Scene_MenuBase {
+        create() {
+            super.create();
+            this.createRepairWindow();
+            this.createCommandWindow();
+        }
+
+        createRepairWindow() {
+            const rect = new Rectangle(0, 0, Graphics.boxWidth, Graphics.boxHeight - 100);
+            this._repairWindow = new Window_RepairList(rect);
+            this.addWindow(this._repairWindow);
+        }
+
+        createCommandWindow() {
+            const rect = new Rectangle(0, Graphics.boxHeight - 100, Graphics.boxWidth, 100);
+            this._commandWindow = new Window_HorzCommand(rect);
+            this._commandWindow.setHandler('repair', this.commandRepair.bind(this));
+            this._commandWindow.setHandler('cancel', this.popScene.bind(this));
+            this.addWindow(this._commandWindow);
+        }
+
+        commandRepair() {
+            const cost = this._repairWindow._data.reduce((acc, item) => {
+                return acc + (getItemDurability(item) - item.durability);
+            }, 0);
+            if ($gameParty.gold() >= cost) {
+                $gameParty.loseGold(cost);
+                this._repairWindow._data.forEach(item => {
+                    item.durability = getItemDurability(item);
+                });
+                this._repairWindow.refresh();
+            } else {
+                // Mostrar mensaje de oro insuficiente
+                $gameMessage.add("No tienes suficiente oro para reparar los ítems.");
+            }
+        }
+    }
+
+
+
+
+
     PluginManager.registerCommand('DurabilitySystem', 'DecreaseDurability', args => {
         let itemId = Number(args.itemId);
         let amount = Number(args.amount);
@@ -176,4 +264,3 @@ Game_Actor.prototype.performAction = function(action) {
     });
 
 })();
-
