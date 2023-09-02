@@ -62,6 +62,9 @@ console.log("Durability System Plugin inicializado");
     }
 
     function getRepairCost(item) {
+        if (!item || !item.note) {
+            return 1;
+        }
         const note = item.note;
         const match = note.match(/<repair-cost:(\d+)>/i);
         return match ? parseInt(match[1]) : 1;
@@ -151,11 +154,36 @@ console.log("Durability System Plugin inicializado");
     };
 
     class Window_RepairList extends Window_Selectable {
+
+
         constructor(rect) {
             super(rect);
             this._data = [];
             this.refresh();
         }
+
+        isTouchOkEnabled() {
+            return true;
+        }
+
+        onTouch(triggered) {
+            const lastIndex = this.index();
+            const x = this.canvasToLocalX(TouchInput.x);
+            const y = this.canvasToLocalY(TouchInput.y);
+            const hitIndex = this.hitTest(x, y);
+            if (hitIndex >= 0) {
+                if (hitIndex === lastIndex) {
+                    if (triggered && this.isTouchOkEnabled()) {
+                        this.processOk();
+                    }
+                } else if (this.isCursorMovable()) {
+                    this.select(hitIndex);
+                }
+            } else if (this.isCancelEnabled()) {
+                this.processCancel();
+            }
+        }
+
 
         processOk() {
             const item = this.item();
@@ -282,6 +310,8 @@ console.log("Durability System Plugin inicializado");
 
     class Window_HorzCommand extends Window_Command {
 
+
+
         setCommandEnabled(commandName, enabled) {
             const command = this._list.find(cmd => cmd.symbol === commandName);
             if (command) {
@@ -290,13 +320,25 @@ console.log("Durability System Plugin inicializado");
             }
         }
 
+
+
         isCommandEnabled(index) {
-            const command = this._list[index];
-            if (command.symbol === 'repair') {
-                return this.isRepairEnabled();
+            if (index === 0) {
+                if (!this._item) {
+                    return false;
+                }
+                const repairCostPerPoint = getRepairCost(this._item);
+                const repairAmount = getItemDurability(this._item) - this._item.durability;
+                const totalRepairCost = repairCostPerPoint * repairAmount;
+                const playerGold = $gameParty.gold();
+
+                return playerGold >= totalRepairCost && repairAmount > 0;
             }
             return true;
         }
+
+
+
 
         processCursorMove() {
             if (this.isCursorMovable()) {
@@ -375,6 +417,7 @@ console.log("Durability System Plugin inicializado");
             this.createCommandWindow();
             this.createTotalCostWindow();
             this.createConfirmWindow();
+            this._repairWindow._confirmWindow = this._confirmWindow;
             this._confirmWindow.deactivate();
             this._confirmWindow.deselect();
         }
@@ -503,10 +546,13 @@ console.log("Durability System Plugin inicializado");
         }
 
 
+
+
         onRepairOk() {
             const item = this._repairWindow.item();
             console.log("Item seleccionado:", item);
             if (item) {
+                this._commandWindow.setItem(item);
                 this._repairWindow.deactivate();
                 this._commandWindow.deactivate();
                 this._confirmWindow.setItem(item);
@@ -546,72 +592,81 @@ console.log("Durability System Plugin inicializado");
 
         start() {
             super.start();
-            this._repairWindow.activate();
-            this._repairWindow.select(0);
-        }
-
-    }
-
- 
-
-class Window_RepairConfirm extends Window_Command {
-    constructor() {
-        const x = 0;
-        const y = 0;
-        const width = Graphics.boxWidth;
-        const height = Graphics.boxHeight;
-        super(new Rectangle(x, y, width, height));
-        this._item = null;
-        this.contents.fontSize = 26; 
-    }
-
-    makeCommandList() {
-        this.addCommand("Sí", 'confirm');
-        this.addCommand('No', 'cancel');
-    }
-
-    setItem(item) {
-        this._item = item;
-        this.refresh();
-    }
-
-    drawBackground() {
-        if (this._item) {
-            const repairCost = getRepairCost(this._item);
-            const playerGold = $gameParty.gold();
-            const centerY = this.contents.height / 2;
-            this.drawText(`Seleccionaste:`, 0, centerY - this.lineHeight() * 5, this.contents.width, 'center');
-            
-            // Icono y nombre con espacio entre ellos
-            this.drawIcon(this._item.iconIndex, (this.contents.width - this.textWidth(this._item.name) - 64) / 2, centerY - this.lineHeight() * 4 + 25);
-            this.drawText(this._item.name, (this.contents.width - this.textWidth(this._item.name)) / 2 + 32, centerY - this.lineHeight() * 4 + 25, this.contents.width, 'left');
-            
-            // Textos alineados a la izquierda y con fuente más pequeña
-            this.contents.fontSize = 22;
-            this.drawText(`- Costo de reparación individual: ${repairCost}`, 0, centerY - this.lineHeight(), this.contents.width, 'left');
-            this.drawText(`- Tienes: ${playerGold}`, 0, centerY, this.contents.width, 'left');
-            
-            this.contents.fontSize = 24;
-            this.drawText("¿De verdad quieres reparar este objeto?", 0, centerY + this.lineHeight() * 2, this.contents.width, 'center');
+            this._commandWindow.activate();
+            this._commandWindow.select(0);
         }
     }
 
-    refresh() {
-        super.refresh();
-        this.drawBackground();
+
+
+    class Window_RepairConfirm extends Window_Command {
+        constructor() {
+            const x = 0;
+            const y = 0;
+            const width = Graphics.boxWidth;
+            const height = Graphics.boxHeight;
+            super(new Rectangle(x, y, width, height));
+            this._item = null;
+            this.contents.fontSize = 26;
+        }
+
+        makeCommandList() {
+            this.addCommand("Sí", 'confirm');
+            this.addCommand('No', 'cancel');
+        }
+
+
+        canRepairItem(item) {
+            const repairCost = getRepairCost(item);
+            const repairAmount = getItemDurability(item) - item.durability;
+            const totalCost = repairCost * repairAmount;
+            return $gameParty.gold() >= totalCost && repairAmount > 0;
+        }
+
+
+        setItem(item) {
+            this._item = item;
+            this.refresh();
+        }
+
+
+        drawBackground() {
+            if (this._item) {
+                const repairCostPerPoint = getRepairCost(this._item);
+                const repairAmount = getItemDurability(this._item) - this._item.durability;
+                const totalRepairCost = repairCostPerPoint * repairAmount;
+                const playerGold = $gameParty.gold();
+                const centerY = this.contents.height / 2;
+
+                this.drawText(`Seleccionaste:`, 0, centerY - this.lineHeight() * 5, this.contents.width, 'center');
+
+                this.drawIcon(this._item.iconIndex, (this.contents.width - this.textWidth(this._item.name) - 64) / 2, centerY - this.lineHeight() * 4 + 25);
+                this.drawText(this._item.name, (this.contents.width - this.textWidth(this._item.name)) / 2 + 32, centerY - this.lineHeight() * 4 + 25, this.contents.width, 'left');
+
+                this.contents.fontSize = 22;
+                this.drawText(`- Costo de reparación individual: ${totalRepairCost}`, 0, centerY - this.lineHeight(), this.contents.width, 'left');
+                this.drawText(`- Tienes: ${playerGold}`, 0, centerY, this.contents.width, 'left');
+
+                this.contents.fontSize = 24;
+                this.drawText("¿De verdad quieres reparar este objeto?", 0, centerY + this.lineHeight() * 2, this.contents.width, 'center');
+            }
+        }
+
+
+        refresh() {
+            super.refresh();
+            this.drawBackground();
+        }
+
+        itemRect(index) {
+            const rect = super.itemRect(index);
+            rect.y += this.contents.height / 4 * 3;
+            rect.width = this.contents.width / 3;
+            rect.x = (this.contents.width - rect.width) / 2;
+            return rect;
+        }
     }
 
-    itemRect(index) {
-        const rect = super.itemRect(index);
-        rect.y += this.contents.height / 4 * 3; // Mueve las elecciones "Sí" y "No" hacia la parte inferior de la ventana
-        rect.width = this.contents.width / 3; // Ancho de las elecciones
-        rect.x = (this.contents.width - rect.width) / 2; // Centraliza las elecciones
-        return rect;
-    }
-}
-
-
-    
 
 
     class Window_TotalRepairCost extends Window_Base {
