@@ -29,17 +29,20 @@
  * @desc Texto para el botón "Reparar".
  * @default Reparar
  *
-* @param cancelText
-* @text Texto "Cancelar"
-* @desc Texto para el botón "Cancelar".
-* @default Cancelar
-*
-* @param totalCostText
-* @text Texto "Costo Total"
-* @desc Texto para mostrar el costo total de la reparación.
-* @default Costo total de la reparación:
-
- * 
+ * @param cancelText
+ * @text Texto "Cancelar"
+ * @desc Texto para el botón "Cancelar".
+ * @default Cancelar
+ *
+ * @param totalCostText
+ * @text Texto "Costo Total"
+ * @desc Texto para mostrar el costo total de la reparación.
+ * @default Costo total de la reparación:
+ * @param noItemsText
+ * @text Texto "Sin Objetos"
+ * @desc Texto a mostrar cuando no hay objetos en el inventario para reparar.
+ * @default No hay objetos en el inventario para reparar
+ *
  * 
  * 
  * 
@@ -155,24 +158,22 @@ Game_Actor.prototype.performAction = function(action) {
             this._data = [];
             this.refresh();
         }
-    
-
+        
         maxItems() {
             return this._data.length;
         }
-
+        
         item() {
             return this._data[this.index()];
         }
-
+        
         makeItemList() {
             this._data = $gameParty.allItems().filter(item => {
                 return (DataManager.isWeapon(item) || DataManager.isArmor(item)) &&
-                       getItemDurability(item) !== -1;
+                getItemDurability(item) !== -1;
             });
         }
         
-
         drawItem(index) {
             const item = this._data[index];
             const rect = this.itemRect(index);
@@ -180,13 +181,21 @@ Game_Actor.prototype.performAction = function(action) {
             const totalCost = repairCost * (getItemDurability(item) - item.durability);
             this.drawItemName(item, rect.x, rect.y, rect.width);
         }
-
+        
         refresh() {
             this.makeItemList();
+            console.log("Número de objetos en el inventario:", this._data.length); // Agregar esta línea
             this.createContents();
-            this.drawAllItems();
+            if (this._data.length === 0) {
+                this.drawText($plugins.filter(p => p.description.includes("Durability System for Items"))[0].parameters.noItemsText || "No hay objetos en el inventario para reparar", 0, this.contents.height / 2 - this.lineHeight() / 2, this.contents.width, 'center');
+            } else {
+                this.drawAllItems();
+            }
         }
+
+
     }
+    
 
     class Window_HorzCommand extends Window_Command {
 
@@ -199,10 +208,26 @@ Game_Actor.prototype.performAction = function(action) {
             }
         }
 
+        isCommandEnabled(index) {
+            const command = this._list[index];
+            if (command.symbol === 'repair') {
+                return $gameParty.allItems().some(item => (DataManager.isWeapon(item) || DataManager.isArmor(item)) && getItemDurability(item) !== -1);
+            }
+            return true;
+        }
+    
+
         
         makeCommandList() {
-            this.addCommand($plugins.filter(p => p.description.includes("Durability System for Items"))[0].parameters.repairText || "Reparar", 'repair');
+            this.addCommand($plugins.filter(p => p.description.includes("Durability System for Items"))[0].parameters.repairText || "Reparar", 'repair', this.isRepairEnabled());
             this.addCommand($plugins.filter(p => p.description.includes("Durability System for Items"))[0].parameters.cancelText || "Cancelar", 'cancel');
+        }
+
+        isRepairEnabled() {
+            return $gameParty.allItems().some(item => {
+                return (DataManager.isWeapon(item) || DataManager.isArmor(item)) && 
+                       item.durability < getItemDurability(item);
+            });
         }
         
     
@@ -246,8 +271,12 @@ Game_Actor.prototype.performAction = function(action) {
             this._commandWindow.setHandler('repair', this.commandRepair.bind(this));
             this._commandWindow.setHandler('cancel', this.popScene.bind(this));
             this.addWindow(this._commandWindow);
-            if (this._repairWindow._data.length === 0 || this.totalRepairCost() === 0) {
+            
+            if (this._repairWindow._data.length === 0) {
                 this._commandWindow.setCommandEnabled('repair', false);
+                console.log("Botón 'Reparar' desactivado"); // Agregar esta línea
+            } else {
+                console.log("Botón 'Reparar' activado"); // Agregar esta línea
             }
         }
 
@@ -270,21 +299,31 @@ Game_Actor.prototype.performAction = function(action) {
         
 
         commandRepair() {
-            const totalCost = this._repairWindow._data.reduce((acc, item) => {
-                const repairCost = getRepairCost(item);
-                return acc + repairCost * (getItemDurability(item) - item.durability);
-            }, 0);
-            if ($gameParty.gold() >= totalCost) {
-                $gameParty.loseGold(totalCost);
-                this._repairWindow._data.forEach(item => {
-                    item.durability = getItemDurability(item);
-                });
-                this._repairWindow.refresh();
-                this.popScene(); 
+            // Verificar si hay objetos en el inventario para reparar
+            if (this._repairWindow._data.length > 0) {
+                const totalCost = this._repairWindow._data.reduce((acc, item) => {
+                    const repairCost = getRepairCost(item);
+                    return acc + repairCost * (getItemDurability(item) - item.durability);
+                }, 0);
+                
+                if ($gameParty.gold() >= totalCost) {
+                    $gameParty.loseGold(totalCost);
+                    this._repairWindow._data.forEach(item => {
+                        item.durability = getItemDurability(item);
+                    });
+                    this._repairWindow.refresh();
+                    this.popScene(); 
+                } else {
+                    $gameMessage.add("No tienes suficiente oro para reparar los ítems.");
+                }
             } else {
-                $gameMessage.add("No tienes suficiente oro para reparar los ítems.");
+                // Aquí puedes agregar un mensaje o acción adicional si el jugador intenta presionar el botón "Reparar" cuando no hay objetos para reparar.
+                // Por ejemplo:
+                $gameMessage.add("No hay objetos en el inventario para reparar.");
             }
         }
+
+
     }
 
 
