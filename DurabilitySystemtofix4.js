@@ -163,18 +163,26 @@ console.log("Durability System Plugin inicializado");
 
         processOk() {
             const item = this.item();
+            console.log("Item seleccionado:", item);
             if (item) {
-                // Si se selecciona un objeto, muestra la ventana de confirmación
+                console.log("Durabilidad del item:", item.durability);
+                console.log("Durabilidad máxima del item:", getItemDurability(item));
+            }
+            if (item && item.durability < getItemDurability(item)) {
+                console.log("Intentando mostrar ventana de confirmación para reparación individual...");
                 this._confirmWindow.setItem(item);
                 this._confirmWindow.refresh();
                 this._confirmWindow.show();
                 this._confirmWindow.activate();
                 this._confirmWindow.select(0);
+                console.log("Ventana de confirmación debería estar visible ahora.");
             } else {
+                console.log("Llamando al manejador predeterminado...");
                 this.callOkHandler();
             }
         }
-     
+        
+        
         
     
         processCancel() {
@@ -377,6 +385,17 @@ console.log("Durability System Plugin inicializado");
 
         update() {
             super.update();
+            if (this._confirmWindow.visible && this._confirmWindow.active) {
+                // Si la ventana de confirmación está activa y visible, solo escuchamos las teclas 'ok' y 'cancel'
+                if (Input.isTriggered('cancel')) {
+                    this.onConfirmCancel();
+                } else if (Input.isTriggered('ok')) {
+                    this.onConfirmOk();
+                }
+                return; // Salimos de la función update para no procesar más teclas
+            }
+        
+            // El resto de tu código de update sigue aquí
             if (Input.isTriggered('cancel')) {
                 if (this._commandWindow.active) {
                     this.popScene();
@@ -386,8 +405,7 @@ console.log("Durability System Plugin inicializado");
                 }
             } else if (Input.isTriggered('ok')) {
                 if (this._repairWindow.active) {
-                    this._repairWindow.deactivate();
-                    this._commandWindow.activate();
+                    this.onRepairOk();
                 } else if (this._commandWindow.active && this._commandWindow.currentSymbol() === 'cancel') {
                     this.popScene();
                 }
@@ -398,6 +416,7 @@ console.log("Durability System Plugin inicializado");
                 }
             }
         }
+        
         
         
 
@@ -455,40 +474,60 @@ console.log("Durability System Plugin inicializado");
         }
 
         createConfirmWindow() {
-            const rect = new Rectangle(0, 0, 400, this.calcWindowHeight(3, true));
+            const ww = 400;
+            const wh = this.calcWindowHeight(3, true);
+            const wx = (Graphics.boxWidth - ww) / 2;
+            const wy = (Graphics.boxHeight - wh) / 2;
+            const rect = new Rectangle(wx, wy, ww, wh);
             this._confirmWindow = new Window_RepairConfirm(rect);
             this._confirmWindow.setHandler('confirm', this.onConfirmOk.bind(this));
             this._confirmWindow.setHandler('cancel', this.onConfirmCancel.bind(this));
             this.addWindow(this._confirmWindow);
-            this._confirmWindow.hide();  // Añade esta línea para ocultar la ventana al inicio
+            this._confirmWindow.hide();
         }
+        
         
         
 
         onConfirmOk() {
             const item = this._repairWindow.item();
-            if (item && $gameParty.gold() >= item.repairCost) {
-                $gameParty.loseGold(item.repairCost);
-                item.repair();
-                this._repairWindow.refresh();
+            const repairCost = getRepairCost(item); // Obtener el costo de reparación del objeto
+            const repairAmount = getItemDurability(item) - item.durability; // Calcular cuánta durabilidad necesita ser restaurada
+            const totalCost = repairCost * repairAmount; // Calcular el costo total de reparación
+        
+            if (item && $gameParty.gold() >= totalCost) {
+                $gameParty.loseGold(totalCost); // Cobrar al jugador
+                item.durability = getItemDurability(item); // Reparar el objeto al máximo
+                this._repairWindow.refresh(); // Refrescar la lista de objetos a reparar
                 this._confirmWindow.hide();
-                this._repairWindow.activate();
+                this._totalCostWindow.refresh();
+                this._repairWindow.activate(); // Activar la ventana de lista de reparación
+            } else {
+                this.onConfirmCancel(); // Si no se puede reparar, simplemente cierra la ventana de confirmación
             }
         }
         
+        
         onConfirmCancel() {
             this._confirmWindow.hide();
-            this._repairWindow.activate();
+            this._repairWindow.refresh(); // Refresca la lista de objetos a reparar
+            this._repairWindow.activate(); // Activa la ventana de lista de reparación
         }
+        
         
         onRepairOk() {
             const item = this._repairWindow.item();
+            console.log("Item seleccionado:", item);
             if (item) {
+                this._repairWindow.deactivate();
+                this._commandWindow.deactivate();
                 this._confirmWindow.setItem(item);
                 this._confirmWindow.refresh();
                 this._confirmWindow.show();
                 this._confirmWindow.activate();
                 this._confirmWindow.select(0);
+            } else {
+                console.error("No se seleccionó ningún ítem.");
             }
         }
         
@@ -541,6 +580,16 @@ console.log("Durability System Plugin inicializado");
             }
             this.addCommand('No', 'cancel');
         }
+
+        setItem(item) {
+            this._item = item;
+            this._repairCost = getRepairCost(item) * (getItemDurability(item) - item.durability);
+        }
+        
+
+
+
+
     }
     
 
