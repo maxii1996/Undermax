@@ -133,12 +133,11 @@ Game_Actor.prototype.performAction = function(action) {
     
     class Window_RepairList extends Window_Selectable {
         constructor(rect) {
-            console.log("Intentando crear la ventana de reparación...");
-
             super(rect);
             this._data = [];
             this.refresh();
         }
+    
 
         maxItems() {
             return this._data.length;
@@ -151,10 +150,10 @@ Game_Actor.prototype.performAction = function(action) {
         makeItemList() {
             this._data = $gameParty.allItems().filter(item => {
                 return (DataManager.isWeapon(item) || DataManager.isArmor(item)) &&
-                       getItemDurability(item) !== -1 && 
-                       item.durability < getItemDurability(item);
+                       getItemDurability(item) !== -1;
             });
         }
+        
 
         drawItem(index) {
             const item = this._data[index];
@@ -162,8 +161,7 @@ Game_Actor.prototype.performAction = function(action) {
             const repairCost = getRepairCost(item);
             const totalCost = repairCost * (getItemDurability(item) - item.durability);
             this.drawItemName(item, rect.x, rect.y, rect.width);
-            this.drawText(`Durabilidad ${item.durability}/${getItemDurability(item)}`, rect.x + 200, rect.y, rect.width, 'left');
-            this.drawText(`Costo: ${totalCost}`, rect.x + 400, rect.y, rect.width, 'left');
+          // this.drawText(`Costo: ${totalCost}`, rect.x + 140, rect.y, rect.width, 'left');
         }
 
         refresh() {
@@ -173,29 +171,50 @@ Game_Actor.prototype.performAction = function(action) {
         }
     }
 
+    class Window_HorzCommand extends Window_Command {
+        makeCommandList() {
+            this.addCommand('Reparar', 'repair');
+            this.addCommand('Cancelar', 'cancel');
+        }
+    
+        numVisibleRows() {
+            return 1; 
+        }
+    
+        maxCols() {
+            return 2; 
+        }
+    }
+
     class Scene_Repair extends Scene_MenuBase {
         
         create() {
-            console.log("Intentando cargar la escena de reparación...");
-
             super.create();
             this.createRepairWindow();
             this.createCommandWindow();
         }
 
         createRepairWindow() {
-            const rect = new Rectangle(0, 0, Graphics.boxWidth, Graphics.boxHeight - 100);
+            const ww = Graphics.boxWidth * 0.6; 
+            const wh = Graphics.boxHeight * 0.6; 
+            const wx = (Graphics.boxWidth - ww) / 2; 
+            const wy = (Graphics.boxHeight - wh) / 2; 
+            const rect = new Rectangle(wx, wy, ww, wh - 100); 
             this._repairWindow = new Window_RepairList(rect);
             this.addWindow(this._repairWindow);
         }
 
         createCommandWindow() {
-            const rect = new Rectangle(0, Graphics.boxHeight - 100, Graphics.boxWidth, 100);
+            const ww = Graphics.boxWidth * 0.6; 
+            const wx = (Graphics.boxWidth - ww) / 2; 
+            const wy = this._repairWindow.y + this._repairWindow.height; 
+            const rect = new Rectangle(wx, wy, ww, 75); 
             this._commandWindow = new Window_HorzCommand(rect);
             this._commandWindow.setHandler('repair', this.commandRepair.bind(this));
             this._commandWindow.setHandler('cancel', this.popScene.bind(this));
             this.addWindow(this._commandWindow);
         }
+        
 
         commandRepair() {
             const totalCost = this._repairWindow._data.reduce((acc, item) => {
@@ -208,6 +227,7 @@ Game_Actor.prototype.performAction = function(action) {
                     item.durability = getItemDurability(item);
                 });
                 this._repairWindow.refresh();
+                this.popScene(); 
             } else {
                 $gameMessage.add("No tienes suficiente oro para reparar los ítems.");
             }
