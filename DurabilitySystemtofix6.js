@@ -575,22 +575,38 @@ console.log("Durability System Plugin inicializado");
         }
         
         makeCommandList() {
-            if (this._item) {  // Asegurarse de que _item esté definido
-                const cost = this._item.repairCost || 0;
-                this.addCommand(`¿Reparar ${this._item.name} individualmente por ${cost} oro?`, 'confirm');
+            if (this._item) {
+                this.addCommand('Si', 'confirm');
+                this.addCommand('No', 'cancel');
             }
-            this.addCommand('No', 'cancel');
         }
-
+    
+        drawItem(index) {
+            const rect = this.itemLineRect(index);
+            const commandName = this.commandName(index);
+            if (index === 0) {
+                const cost = getRepairCost(this._item);
+                const text = `Seleccionaste:\n\n${this._item.name}\n\nSu costo de reparación es:\n${cost}\n\n¿Reparar este objeto individualmente?`;
+                this.drawTextEx(text, 0, 0);
+                rect.y += this.fittingHeight(6); // Ajusta la posición de los comandos
+            }
+            this.drawText(commandName, rect.x, rect.y, rect.width, rect.height);
+        }
+        
+        itemLineRect(index) {
+            const rect = super.itemRect(index);
+            rect.y += this.fittingHeight(6); // Ajusta la posición de los comandos
+            return rect;
+        }
+        
         setItem(item) {
             this._item = item;
             this.refresh();
         }
-
-
-
-
     }
+    
+    
+    
     
 
 
