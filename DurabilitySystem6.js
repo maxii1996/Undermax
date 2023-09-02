@@ -25,30 +25,32 @@
  * 
  * 
  * @param repairText
- *¨@text Texto "Reparar"
- * @desc Texto para el botón "Reparar".
- * @default Reparar
+ * @text Repair Text
+ * @desc Text for the "Repair" button.
+ * @default Repair
  *
  * @param cancelText
- * @text Texto "Cancelar"
- * @desc Texto para el botón "Cancelar".
- * @default Cancelar
+ * @text Cancel Text
+ * @desc Text for the "Cancel" button.
+ * @default Cancel
  *
  * @param totalCostText
- * @text Texto "Costo Total"
- * @desc Texto para mostrar el costo total de la reparación.
- * @default Costo total de la reparación:
+ * @text Total Cost Text
+ * @desc Text to display the total repair cost.
+ * @default Total Repair Cost:
  * @param noItemsText
- * @text Texto "Sin Objetos"
- * @desc Texto a mostrar cuando no hay objetos en el inventario para reparar.
- * @default No hay objetos en el inventario para reparar
+ * @text No Items Text
+ * @desc Text to show when there are no items in the inventory to repair.
+ * @default There are no items in the inventory to repair.
  *
- * 
- * 
- * 
+ * @param availableMoneyText
+ * @text Available Money Text
+ * @desc Text to display the player's available money.
+ * @default Available Money:
  */
 
- 
+
+
 console.log("Durability System Plugin inicializado");
 
 (() => {
@@ -68,7 +70,7 @@ console.log("Durability System Plugin inicializado");
         const match = note.match(/<repair-cost:(\d+)>/i);
         return match ? parseInt(match[1]) : 1;
     }
-    
+
 
     function initializeDurability(item) {
         if (item && getItemDurability(item) !== -1 && (item.durability === undefined)) {
@@ -77,71 +79,71 @@ console.log("Durability System Plugin inicializado");
     }
 
     const _DataManager_extractMetadata = DataManager.extractMetadata;
-    DataManager.extractMetadata = function(data) {
+    DataManager.extractMetadata = function (data) {
         _DataManager_extractMetadata.apply(this, arguments);
         initializeDurability(data);
     };
 
 
-function getSkillBreakValue(skill) {
-    if (skill.note.match(/<no-break>/i)) {
-        return 0;
+    function getSkillBreakValue(skill) {
+        if (skill.note.match(/<no-break>/i)) {
+            return 0;
+        }
+        let match = skill.note.match(/<break-value:(\d+)>/i);
+        if (match) {
+            return Number(match[1]);
+        }
+        return 1;
     }
-    let match = skill.note.match(/<break-value:(\d+)>/i);
-    if (match) {
-        return Number(match[1]);
+
+    function shouldNullifySpecialAttributes(item) {
+        return item.note.includes('<break-effect:null-sp-attributes>');
     }
-    return 1; 
-}
 
-function shouldNullifySpecialAttributes(item) {
-    return item.note.includes('<break-effect:null-sp-attributes>');
-}
+    const _Game_Actor_performAction = Game_Actor.prototype.performAction;
+    Game_Actor.prototype.performAction = function (action) {
+        _Game_Actor_performAction.call(this, action);
 
-const _Game_Actor_performAction = Game_Actor.prototype.performAction;
-Game_Actor.prototype.performAction = function(action) {
-    _Game_Actor_performAction.call(this, action);
+        let breakValue = getSkillBreakValue(action.item());
 
-    let breakValue = getSkillBreakValue(action.item());
+        this.equips().forEach((equip) => {
+            if (equip && getItemDurability(equip) !== -1 && equip.durability > 0) {
+                equip.durability = Math.max(equip.durability - breakValue, 0);
 
-    this.equips().forEach((equip) => {
-        if (equip && getItemDurability(equip) !== -1 && equip.durability > 0) {
-            equip.durability = Math.max(equip.durability - breakValue, 0);
-    
-            if (equip.durability <= 0 && !equip._originalParams) {
-                equip._originalParams = equip.params.slice();
-                equip.params.fill(0);
-    
-                if (shouldNullifySpecialAttributes(equip)) {
-                    if (equip.xparams) {
-                        equip._originalXparams = equip.xparams.slice();
-                        equip.xparams.fill(0);
-                    } else {
-                        equip.xparams = Array(10).fill(0);  
-                    }
-    
-                    if (equip.sparams) {
-                        equip._originalSparams = equip.sparams.slice();
-                        equip.sparams.fill(0);
-                    } else {
-                        equip.sparams = Array(10).fill(0);  
-                    }
-    
-                    if (equip.traits) {
-                        equip._originalTraits = equip.traits.slice();
-                        equip.traits = [];
-                    } else {
-                        equip.traits = [];
+                if (equip.durability <= 0 && !equip._originalParams) {
+                    equip._originalParams = equip.params.slice();
+                    equip.params.fill(0);
+
+                    if (shouldNullifySpecialAttributes(equip)) {
+                        if (equip.xparams) {
+                            equip._originalXparams = equip.xparams.slice();
+                            equip.xparams.fill(0);
+                        } else {
+                            equip.xparams = Array(10).fill(0);
+                        }
+
+                        if (equip.sparams) {
+                            equip._originalSparams = equip.sparams.slice();
+                            equip.sparams.fill(0);
+                        } else {
+                            equip.sparams = Array(10).fill(0);
+                        }
+
+                        if (equip.traits) {
+                            equip._originalTraits = equip.traits.slice();
+                            equip.traits = [];
+                        } else {
+                            equip.traits = [];
+                        }
                     }
                 }
             }
-        }
-    });
+        });
 
- };
+    };
 
     const _Window_Base_drawItemName = Window_Base.prototype.drawItemName;
-    Window_Base.prototype.drawItemName = function(item, x, y, width) {
+    Window_Base.prototype.drawItemName = function (item, x, y, width) {
         if (item) {
             _Window_Base_drawItemName.call(this, item, x, y, width);
             if (getItemDurability(item) !== -1) {
@@ -153,7 +155,7 @@ Game_Actor.prototype.performAction = function(action) {
     };
 
 
-    
+
     class Window_RepairList extends Window_Selectable {
         constructor(rect) {
             super(rect);
@@ -164,7 +166,7 @@ Game_Actor.prototype.performAction = function(action) {
         isBottomRow() {
             return this.index() >= (this.maxItems() - this.maxCols());
         }
-        
+
         isTopRow() {
             return this.index() < this.maxCols();
         }
@@ -177,59 +179,57 @@ Game_Actor.prototype.performAction = function(action) {
                 this.setTopRow(row - this.visibleRows() + 2);
             }
         }
-      
+
 
         setCommandWindow(commandWindow) {
             this._commandWindow = commandWindow;
         }
 
         cursorDown(wrap) {
-            console.log("Intentando mover hacia abajo desde:", this.index());
             if (this.index() < this.maxItems() - 1) {
                 super.cursorDown(wrap);
             } else {
-                this.select(0); 
+                this.select(0);
             }
             this.ensureCursorVisible();
         }
-        
+
         cursorUp(wrap) {
-            console.log("Intentando mover hacia arriba desde:", this.index());
             if (this.index() > 0) {
                 super.cursorUp(wrap);
             } else {
-                this.select(this.maxItems() - 1); 
+                this.select(this.maxItems() - 1);
             }
             this.ensureCursorVisible();
         }
 
         visibleRows() {
-            return 5; 
+            return 5;
         }
 
         maxCols() {
-            return 1; 
+            return 1;
         }
 
         itemHeight() {
-            return this.lineHeight() * 1; 
+            return this.lineHeight() * 1;
         }
-        
+
         maxItems() {
             return this._data ? this._data.length : 0;
         }
-        
+
         item() {
             return this._data[this.index()];
         }
-        
+
         makeItemList() {
             this._data = $gameParty.allItems().filter(item => {
                 return (DataManager.isWeapon(item) || DataManager.isArmor(item)) &&
-                getItemDurability(item) !== -1;
+                    getItemDurability(item) !== -1;
             });
         }
-        
+
         drawItem(index) {
             const item = this._data[index];
             const rect = this.itemRect(index);
@@ -237,21 +237,20 @@ Game_Actor.prototype.performAction = function(action) {
             const totalCost = repairCost * (getItemDurability(item) - item.durability);
             this.drawItemName(item, rect.x, rect.y, rect.width);
         }
-        
+
         refresh() {
             this.makeItemList();
-            console.log("Número de objetos en el inventario:", this._data.length); // Agregar esta línea
             this.createContents();
             if (this._data.length === 0) {
+                this.contents.fontSize *= 0.8;
                 this.drawText($plugins.filter(p => p.description.includes("Durability System for Items"))[0].parameters.noItemsText || "No hay objetos en el inventario para reparar", 0, this.contents.height / 2 - this.lineHeight() / 2, this.contents.width, 'center');
+                this.resetFontSettings();
             } else {
                 this.drawAllItems();
             }
         }
-
-
     }
-    
+
 
     class Window_HorzCommand extends Window_Command {
 
@@ -271,17 +270,15 @@ Game_Actor.prototype.performAction = function(action) {
             }
             return true;
         }
-    
+
         processCursorMove() {
             if (this.isCursorMovable()) {
                 const lastIndex = this.index();
                 if (Input.isTriggered('up') && this._repairWindow) {
-                    console.log("Intentando mover desde Window_HorzCommand hacia arriba");
                     this.deactivate();
                     this._repairWindow.activate();
                     this._repairWindow.select(this._repairWindow.maxItems() - 1);
                 } else if (Input.isTriggered('down') && this._repairWindow) {
-                    console.log("Intentando mover desde Window_HorzCommand hacia abajo");
                     this.deactivate();
                     this._repairWindow.activate();
                     this._repairWindow.select(0);
@@ -290,39 +287,57 @@ Game_Actor.prototype.performAction = function(action) {
                 }
             }
         }
-        
 
-        
+
+
         makeCommandList() {
-            this.addCommand($plugins.filter(p => p.description.includes("Durability System for Items"))[0].parameters.repairText || "Reparar", 'repair', this.isRepairEnabled());
-            this.addCommand($plugins.filter(p => p.description.includes("Durability System for Items"))[0].parameters.cancelText || "Cancelar", 'cancel');
+            const plugin = $plugins.find(p => p.description.includes("Durability System for Items"));
+
+            if (plugin && plugin.parameters) {
+                const repairText = plugin.parameters["repairText"] || "Reparar";
+                const cancelText = plugin.parameters["cancelText"] || "Cancelar";
+
+                this.addCommand(repairText, 'repair', this.isRepairEnabled());
+                this.addCommand(cancelText, 'cancel');
+            }
         }
+
+
+
 
         isRepairEnabled() {
+            if (!this._repairWindow) return false;
+
+            const totalCost = this._repairWindow._data.reduce((acc, item) => {
+                const repairCost = getRepairCost(item);
+                return acc + repairCost * (getItemDurability(item) - item.durability);
+            }, 0);
+
             return $gameParty.allItems().some(item => {
-                return (DataManager.isWeapon(item) || DataManager.isArmor(item)) && 
-                       item.durability !== undefined && 
-                       item.durability < getItemDurability(item);
-            });
+                return (DataManager.isWeapon(item) || DataManager.isArmor(item)) &&
+                    item.durability !== undefined &&
+                    item.durability < getItemDurability(item);
+            }) && $gameParty.gold() >= totalCost;
         }
-        
-        
-    
+
+
+
+
         numVisibleRows() {
-            return 1; 
+            return 1;
         }
-    
+
         maxCols() {
-            return 2; 
+            return 2;
         }
     }
 
 
 
     class Scene_Repair extends Scene_MenuBase {
-        
 
-        
+
+
         create() {
             super.create();
             this.createRepairWindow();
@@ -331,14 +346,14 @@ Game_Actor.prototype.performAction = function(action) {
             this._repairWindow.setCommandWindow(this._commandWindow); // Añade esta línea después de crear ambas ventanas
         }
 
-        
+
 
         createRepairWindow() {
-            const ww = Graphics.boxWidth * 0.75; 
-            const wh = Graphics.boxHeight * 0.75; 
-            const wx = (Graphics.boxWidth - ww) / 2; 
-            const wy = (Graphics.boxHeight - wh) / 2; 
-            const rect = new Rectangle(wx, wy, ww, wh - 100); 
+            const ww = Graphics.boxWidth * 0.75;
+            const wh = Graphics.boxHeight * 0.70;
+            const wx = (Graphics.boxWidth - ww) / 2;
+            const wy = (Graphics.boxHeight - wh) / 2;
+            const rect = new Rectangle(wx, wy, ww, wh - 120);
             this._repairWindow = new Window_RepairList(rect);
             this.addWindow(this._repairWindow);
             this._repairWindow.setCommandWindow(this._commandWindow); // Añade esta línea
@@ -346,76 +361,73 @@ Game_Actor.prototype.performAction = function(action) {
         }
 
         createCommandWindow() {
-            const ww = Graphics.boxWidth * 0.75; 
-            const wx = (Graphics.boxWidth - ww) / 2; 
-            const wy = 85 + this._repairWindow.y + this._repairWindow.height; 
-            const rect = new Rectangle(wx, wy, ww, 75); 
+            const ww = Graphics.boxWidth * 0.75;
+            const wx = (Graphics.boxWidth - ww) / 2;
+            const wy = 105 + this._repairWindow.y + this._repairWindow.height;
+            const rect = new Rectangle(wx, wy, ww, 75);
             this._commandWindow = new Window_HorzCommand(rect);
             this._commandWindow.setHandler('repair', this.commandRepair.bind(this));
             this._commandWindow.setHandler('cancel', this.popScene.bind(this));
             this.addWindow(this._commandWindow);
-            
+
             if (this._repairWindow._data.length === 0) {
                 this._commandWindow.setCommandEnabled('repair', false);
-                console.log("Botón 'Reparar' desactivado"); 
+                console.log("Botón 'Reparar' desactivado");
             } else {
-                console.log("Botón 'Reparar' activado"); 
+                console.log("Botón 'Reparar' activado");
             }
 
-           
+
 
         }
 
         createTotalCostWindow() {
             const ww = Graphics.boxWidth * 0.75;
             const wx = (Graphics.boxWidth - ww) / 2;
-            const wy = this._commandWindow.y - 80; 
-            const rect = new Rectangle(wx, wy, ww, 55);
+            const wy = this._commandWindow.y - 100;
+            const rect = new Rectangle(wx, wy, ww, 95);
             this._totalCostWindow = new Window_TotalRepairCost(rect, this._repairWindow);
             this.addWindow(this._totalCostWindow);
         }
-        
+
         totalRepairCost() {
             return this._repairWindow._data.reduce((acc, item) => {
                 const repairCost = getRepairCost(item);
                 return acc + repairCost * (getItemDurability(item) - item.durability);
             }, 0);
         }
-        
-        
+
+
 
         commandRepair() {
-           
+
             if (this._repairWindow._data.length > 0) {
                 const totalCost = this._repairWindow._data.reduce((acc, item) => {
                     const repairCost = getRepairCost(item);
                     return acc + repairCost * (getItemDurability(item) - item.durability);
                 }, 0);
-                
+
                 if ($gameParty.gold() >= totalCost) {
                     $gameParty.loseGold(totalCost);
                     this._repairWindow._data.forEach(item => {
                         item.durability = getItemDurability(item);
                     });
                     this._repairWindow.refresh();
-                    this.popScene(); 
+                    this.popScene();
                 } else {
                     $gameMessage.add("No tienes suficiente oro para reparar los ítems.");
                 }
             } else {
-               
+
                 $gameMessage.add("No hay objetos en el inventario para reparar.");
             }
         }
 
-
         start() {
             super.start();
-            this._repairWindow.activate(); 
-            this._repairWindow.select(0); 
+            this._repairWindow.activate();
+            this._repairWindow.select(0);
         }
-
-
 
     }
 
@@ -426,18 +438,23 @@ Game_Actor.prototype.performAction = function(action) {
             this._repairWindow = repairWindow;
             this.refresh();
         }
-    
+
         refresh() {
             this.contents.clear();
             const totalCost = this._repairWindow._data.reduce((acc, item) => {
                 const repairCost = getRepairCost(item);
                 return acc + repairCost * (getItemDurability(item) - item.durability);
             }, 0);
+            this.contents.fontSize *= 0.8;
             this.drawText($plugins.filter(p => p.description.includes("Durability System for Items"))[0].parameters.totalCostText + " " + totalCost, 0, 0, this.width - this.padding * 2, 'left');
+
+            const availableMoneyText = $plugins.filter(p => p.description.includes("Durability System for Items"))[0].parameters.availableMoneyText || "Dinero Disponible:";
+            this.drawText(availableMoneyText, 0, this.lineHeight(), this.width - this.padding * 2 - 100, 'left');
+            this.drawText($gameParty.gold(), this.textWidth(availableMoneyText) + 10, this.lineHeight(), this.width - this.padding * 2, 'left');
+
+            this.resetFontSettings();
         }
     }
-    
-
 
     PluginManager.registerCommand('DurabilitySystem', 'DecreaseDurability', args => {
         let itemId = Number(args.itemId);
@@ -458,7 +475,7 @@ Game_Actor.prototype.performAction = function(action) {
         if (item && item._originalParams) {
             item.params = item._originalParams.slice();
             delete item._originalParams;
-    
+
             if (item._originalXparams) {
                 item.xparams = item._originalXparams.slice();
                 delete item._originalXparams;
@@ -471,7 +488,7 @@ Game_Actor.prototype.performAction = function(action) {
                 item.traits = item._originalTraits.slice();
                 delete item._originalTraits;
             }
-    
+
             item.durability = getItemDurability(item);
         }
     });
@@ -479,7 +496,7 @@ Game_Actor.prototype.performAction = function(action) {
     PluginManager.registerCommand('DurabilitySystem', 'ShowRepairScene', args => {
         SceneManager.push(Scene_Repair);
     });
-    
-    
+
+
 
 })();
