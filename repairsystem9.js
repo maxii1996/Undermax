@@ -215,6 +215,9 @@ Game_Actor.prototype.performAction = function(action) {
         }
     }
 
+
+    
+
     class Scene_Repair extends Scene_MenuBase {
         
         create() {
@@ -243,7 +246,7 @@ Game_Actor.prototype.performAction = function(action) {
             this._commandWindow.setHandler('repair', this.commandRepair.bind(this));
             this._commandWindow.setHandler('cancel', this.popScene.bind(this));
             this.addWindow(this._commandWindow);
-            if (this._repairWindow._data.length === 0) {
+            if (this._repairWindow._data.length === 0 || this.totalRepairCost() === 0) {
                 this._commandWindow.setCommandEnabled('repair', false);
             }
         }
@@ -255,6 +258,13 @@ Game_Actor.prototype.performAction = function(action) {
             const rect = new Rectangle(wx, wy, ww, 50);
             this._totalCostWindow = new Window_TotalRepairCost(rect, this._repairWindow);
             this.addWindow(this._totalCostWindow);
+        }
+        
+        totalRepairCost() {
+            return this._repairWindow._data.reduce((acc, item) => {
+                const repairCost = getRepairCost(item);
+                return acc + repairCost * (getItemDurability(item) - item.durability);
+            }, 0);
         }
         
         
