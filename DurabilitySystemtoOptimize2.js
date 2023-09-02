@@ -552,29 +552,66 @@ console.log("Durability System Plugin inicializado");
 
     }
 
+ 
 
-    class Window_RepairConfirm extends Window_Command {
-        constructor(rect, item) {
-            super(rect);
-            this._item = item;
-            this.refresh();
-        }
-
-        makeCommandList() {
-            if (this._item) {
-                const cost = this._item.repairCost || 0;
-                this.addCommand(`Reparar ${this._item.name} por ${cost} oro?`, 'confirm');
-            }
-            this.addCommand('No reparar', 'cancel');
-        }
-
-        setItem(item) {
-            this._item = item;
-            this.refresh();
-        }
-
+class Window_RepairConfirm extends Window_Command {
+    constructor() {
+        const x = 0;
+        const y = 0;
+        const width = Graphics.boxWidth;
+        const height = Graphics.boxHeight;
+        super(new Rectangle(x, y, width, height));
+        this._item = null;
+        this.contents.fontSize = 26; 
     }
 
+    makeCommandList() {
+        this.addCommand("Sí", 'confirm');
+        this.addCommand('No', 'cancel');
+    }
+
+    setItem(item) {
+        this._item = item;
+        this.refresh();
+    }
+
+    drawBackground() {
+        if (this._item) {
+            const repairCost = getRepairCost(this._item);
+            const playerGold = $gameParty.gold();
+            const centerY = this.contents.height / 2;
+            this.drawText(`Seleccionaste:`, 0, centerY - this.lineHeight() * 5, this.contents.width, 'center');
+            
+            // Icono y nombre con espacio entre ellos
+            this.drawIcon(this._item.iconIndex, (this.contents.width - this.textWidth(this._item.name) - 64) / 2, centerY - this.lineHeight() * 4 + 25);
+            this.drawText(this._item.name, (this.contents.width - this.textWidth(this._item.name)) / 2 + 32, centerY - this.lineHeight() * 4 + 25, this.contents.width, 'left');
+            
+            // Textos alineados a la izquierda y con fuente más pequeña
+            this.contents.fontSize = 22;
+            this.drawText(`- Costo de reparación individual: ${repairCost}`, 0, centerY - this.lineHeight(), this.contents.width, 'left');
+            this.drawText(`- Tienes: ${playerGold}`, 0, centerY, this.contents.width, 'left');
+            
+            this.contents.fontSize = 24;
+            this.drawText("¿De verdad quieres reparar este objeto?", 0, centerY + this.lineHeight() * 2, this.contents.width, 'center');
+        }
+    }
+
+    refresh() {
+        super.refresh();
+        this.drawBackground();
+    }
+
+    itemRect(index) {
+        const rect = super.itemRect(index);
+        rect.y += this.contents.height / 4 * 3; // Mueve las elecciones "Sí" y "No" hacia la parte inferior de la ventana
+        rect.width = this.contents.width / 3; // Ancho de las elecciones
+        rect.x = (this.contents.width - rect.width) / 2; // Centraliza las elecciones
+        return rect;
+    }
+}
+
+
+    
 
 
     class Window_TotalRepairCost extends Window_Base {
