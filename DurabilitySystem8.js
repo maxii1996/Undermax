@@ -186,6 +186,8 @@ console.log("Durability System Plugin inicializado");
         }
 
         cursorDown(wrap) {
+            console.log("Intentando desplazarse hacia abajo...");
+
             if (this.index() < this.maxItems() - 1) {
                 super.cursorDown(wrap);
             } else {
@@ -195,6 +197,8 @@ console.log("Durability System Plugin inicializado");
         }
 
         cursorUp(wrap) {
+            console.log("Intentando desplazarse hacia arriba...");
+
             if (this.index() > 0) {
                 super.cursorUp(wrap);
             } else {
@@ -306,19 +310,35 @@ console.log("Durability System Plugin inicializado");
 
 
         isRepairEnabled() {
-            if (!this._repairWindow) return false;
-
+            console.log("Verificando si el botón de reparar está habilitado...");
+        
+            if (!this._repairWindow || !this._repairWindow._data) {
+                console.log("El _repairWindow no está definido o no tiene datos.");
+                return false;
+            }
+        
             const totalCost = this._repairWindow._data.reduce((acc, item) => {
                 const repairCost = getRepairCost(item);
                 return acc + repairCost * (getItemDurability(item) - item.durability);
             }, 0);
-
-            return $gameParty.allItems().some(item => {
-                return (DataManager.isWeapon(item) || DataManager.isArmor(item)) &&
-                    item.durability !== undefined &&
-                    item.durability < getItemDurability(item);
-            }) && $gameParty.gold() >= totalCost;
+            
+            console.log("Costo total de reparación:", totalCost);
+            console.log("Oro del jugador:", $gameParty.gold());
+        
+            const hasItemsToRepair = $gameParty.allItems().some(item => {
+                return (DataManager.isWeapon(item) || DataManager.isArmor(item)) && 
+                item.durability !== undefined && 
+                item.durability < getItemDurability(item);
+            });
+        
+            console.log("¿Hay ítems para reparar?", hasItemsToRepair);
+        
+            const canAfford = $gameParty.gold() >= totalCost;
+            console.log("¿El jugador puede pagar?", canAfford);
+        
+            return hasItemsToRepair && canAfford;
         }
+        
 
 
 
@@ -342,9 +362,9 @@ console.log("Durability System Plugin inicializado");
             super.create();
             this.createRepairWindow();
             this.createCommandWindow();
-            this.createTotalCostWindow();
-            this._repairWindow.setCommandWindow(this._commandWindow); // Añade esta línea después de crear ambas ventanas
+            this.createTotalCostWindow(); // Asegúrate de que esto se llame
         }
+        
 
 
 
@@ -356,8 +376,9 @@ console.log("Durability System Plugin inicializado");
             const rect = new Rectangle(wx, wy, ww, wh - 120);
             this._repairWindow = new Window_RepairList(rect);
             this.addWindow(this._repairWindow);
-            this._repairWindow.setCommandWindow(this._commandWindow); // Añade esta línea
-
+            if (this._commandWindow) {
+                this._commandWindow._repairWindow = this._repairWindow;
+            }
         }
 
         createCommandWindow() {
@@ -369,17 +390,22 @@ console.log("Durability System Plugin inicializado");
             this._commandWindow.setHandler('repair', this.commandRepair.bind(this));
             this._commandWindow.setHandler('cancel', this.popScene.bind(this));
             this.addWindow(this._commandWindow);
-
+            
+            // Asegurarse de que _repairWindow esté asignado a _commandWindow
+            this._commandWindow._repairWindow = this._repairWindow;
+            
+            // Refrescar _commandWindow después de asignar _repairWindow
+            this._commandWindow.refresh();
+        
             if (this._repairWindow._data.length === 0) {
+                console.log("No hay ítems en _repairWindow._data");
                 this._commandWindow.setCommandEnabled('repair', false);
-                console.log("Botón 'Reparar' desactivado");
             } else {
-                console.log("Botón 'Reparar' activado");
+                console.log("Hay ítems en _repairWindow._data");
             }
-
-
-
         }
+        
+        
 
         createTotalCostWindow() {
             const ww = Graphics.boxWidth * 0.75;
