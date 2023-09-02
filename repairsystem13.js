@@ -251,7 +251,8 @@ Game_Actor.prototype.performAction = function(action) {
             this._repairWindow = new Window_RepairList(rect);
             this._repairWindow.setHandler('ok', this.onRepairOk.bind(this));
             this._repairWindow.setHandler('cancel', this.onRepairCancel.bind(this));
-            this._repairWindow.setHandler('loaded', this.onRepairLoaded.bind(this)); // Añadir esta línea
+            this._repairWindow.setHandler('loaded', this.onRepairLoaded.bind(this));
+            
             this.addWindow(this._repairWindow);
         }
 
@@ -261,6 +262,10 @@ Game_Actor.prototype.performAction = function(action) {
             } else {
                 this._commandWindow.setCommandEnabled('repair', true);
             }
+        }
+        
+        onRepairOk() {
+            this._repairWindow.activate();
         }
         
         
