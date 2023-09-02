@@ -248,7 +248,7 @@ Game_Actor.prototype.performAction = function(action) {
 
         createRepairWindow() {
             const rect = new Rectangle(0, 0, Graphics.boxWidth, Graphics.boxHeight - 100);
-            this._repairWindow = new Window_Repair(rect);
+            this._repairWindow = new Window_RepairList(rect);
             this._repairWindow.setHandler('ok', this.onRepairOk.bind(this));
             this._repairWindow.setHandler('cancel', this.onRepairCancel.bind(this));
             this._repairWindow.setHandler('loaded', this.onRepairLoaded.bind(this)); // Añadir esta línea
@@ -262,6 +262,7 @@ Game_Actor.prototype.performAction = function(action) {
                 this._commandWindow.setCommandEnabled('repair', true);
             }
         }
+        
         
 
         createCommandWindow() {
