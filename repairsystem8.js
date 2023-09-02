@@ -189,6 +189,17 @@ Game_Actor.prototype.performAction = function(action) {
     }
 
     class Window_HorzCommand extends Window_Command {
+
+
+        setCommandEnabled(commandName, enabled) {
+            const command = this._list.find(cmd => cmd.symbol === commandName);
+            if (command) {
+                command.enabled = enabled;
+                this.refresh();
+            }
+        }
+
+        
         makeCommandList() {
             this.addCommand($plugins.filter(p => p.description.includes("Durability System for Items"))[0].parameters.repairText || "Reparar", 'repair');
             this.addCommand($plugins.filter(p => p.description.includes("Durability System for Items"))[0].parameters.cancelText || "Cancelar", 'cancel');
