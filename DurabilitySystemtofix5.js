@@ -501,6 +501,7 @@ console.log("Durability System Plugin inicializado");
                 this._repairWindow.refresh(); // Refrescar la lista de objetos a reparar
                 this._confirmWindow.hide();
                 this._totalCostWindow.refresh();
+
                 this._repairWindow.activate(); // Activar la ventana de lista de reparación
             } else {
                 this.onConfirmCancel(); // Si no se puede reparar, simplemente cierra la ventana de confirmación
@@ -583,9 +584,8 @@ console.log("Durability System Plugin inicializado");
 
         setItem(item) {
             this._item = item;
-            this._repairCost = getRepairCost(item) * (getItemDurability(item) - item.durability);
+            this.refresh();
         }
-        
 
 
 
