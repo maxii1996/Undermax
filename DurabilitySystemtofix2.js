@@ -176,11 +176,11 @@ console.log("Durability System Plugin inicializado");
             if (this._commandWindow) {
                 this.deactivate();
                 this._commandWindow.activate();
-                this._commandWindow.select(1); // Selecciona el botón de Cancelar por defecto
             } else {
                 super.processCancel();
             }
         }
+        
         
     
 
@@ -365,12 +365,25 @@ console.log("Durability System Plugin inicializado");
             this.createRepairWindow();
             this.createCommandWindow();
             this.createTotalCostWindow();
+            this.createConfirmWindow();
         }
 
         update() {
             super.update();
             if (Input.isTriggered('cancel')) {
-                this.popScene();
+                if (this._commandWindow.active) {
+                    this.popScene();
+                } else if (this._repairWindow.active) {
+                    this._repairWindow.deactivate();
+                    this._commandWindow.activate();
+                }
+            } else if (Input.isTriggered('ok')) {
+                if (this._repairWindow.active) {
+                    this._repairWindow.deactivate();
+                    this._commandWindow.activate();
+                } else if (this._commandWindow.active && this._commandWindow.currentSymbol() === 'cancel') {
+                    this.popScene();
+                }
             } else if (Input.isTriggered('left') || Input.isTriggered('right')) {
                 if (!this._commandWindow.active) {
                     this._commandWindow.activate();
@@ -378,6 +391,8 @@ console.log("Durability System Plugin inicializado");
                 }
             }
         }
+        
+        
 
         createRepairWindow() {
             const ww = Graphics.boxWidth * 0.75;
@@ -432,7 +447,41 @@ console.log("Durability System Plugin inicializado");
             }, 0);
         }
 
+        createConfirmWindow() {
+            const rect = new Rectangle(0, 0, 400, this.calcWindowHeight(3, true));
+            this._confirmWindow = new Window_RepairConfirm(rect);
+            this._confirmWindow.setHandler('confirm', this.onConfirmOk.bind(this));
+            this._confirmWindow.setHandler('cancel', this.onConfirmCancel.bind(this));
+            this.addWindow(this._confirmWindow);
+        }
+        
 
+        onConfirmOk() {
+            const item = this._repairWindow.item();
+            if (item && $gameParty.gold() >= item.repairCost) {
+                $gameParty.loseGold(item.repairCost);
+                item.repair();
+                this._repairWindow.refresh();
+                this._confirmWindow.hide();
+                this._repairWindow.activate();
+            }
+        }
+        
+        onConfirmCancel() {
+            this._confirmWindow.hide();
+            this._repairWindow.activate();
+        }
+        
+        onRepairOk() {
+            const item = this._repairWindow.item();
+            if (item) {
+                this._confirmWindow._item = item;
+                this._confirmWindow.refresh();
+                this._confirmWindow.show();
+                this._confirmWindow.activate();
+            }
+        }
+        
 
         commandRepair() {
 
@@ -465,6 +514,22 @@ console.log("Durability System Plugin inicializado");
         }
 
     }
+
+
+    class Window_RepairConfirm extends Window_Command {
+        constructor(rect, item) {
+            super(rect);
+            this._item = item;
+            this.refresh();
+        }
+    
+        makeCommandList() {
+            const cost = this._item ? this._item.repairCost : 0;
+            this.addCommand(`¿Reparar ${this._item.name} individualmente por ${cost} oro?`, 'confirm');
+            this.addCommand('No', 'cancel');
+        }
+    }
+    
 
 
     class Window_TotalRepairCost extends Window_Base {
