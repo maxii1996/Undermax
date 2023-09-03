@@ -207,8 +207,6 @@ console.log("Durability System Plugin inicializado");
         }
 
 
-
-
         processCancel() {
             if (this._commandWindow) {
                 this.deactivate();
@@ -217,8 +215,6 @@ console.log("Durability System Plugin inicializado");
                 super.processCancel();
             }
         }
-
-
 
 
         isBottomRow() {
@@ -310,8 +306,6 @@ console.log("Durability System Plugin inicializado");
 
     class Window_HorzCommand extends Window_Command {
 
-
-
         setCommandEnabled(commandName, enabled) {
             const command = this._list.find(cmd => cmd.symbol === commandName);
             if (command) {
@@ -319,7 +313,6 @@ console.log("Durability System Plugin inicializado");
                 this.refresh();
             }
         }
-
 
 
         isCommandEnabled(index) {
@@ -336,8 +329,6 @@ console.log("Durability System Plugin inicializado");
             }
             return true;
         }
-
-
 
 
         processCursorMove() {
@@ -545,14 +536,10 @@ console.log("Durability System Plugin inicializado");
             this._repairWindow.activate();
         }
 
-
-
-
         onRepairOk() {
             const item = this._repairWindow.item();
             console.log("Item seleccionado:", item);
             if (item) {
-                this._commandWindow.setItem(item);
                 this._repairWindow.deactivate();
                 this._commandWindow.deactivate();
                 this._confirmWindow.setItem(item);
@@ -564,7 +551,6 @@ console.log("Durability System Plugin inicializado");
                 console.error("No se seleccionó ningún ítem.");
             }
         }
-
 
         commandRepair() {
 
@@ -610,6 +596,15 @@ console.log("Durability System Plugin inicializado");
             this.contents.fontSize = 26;
         }
 
+        isCommandEnabled(index) {
+            const command = this._list[index];
+            if (command && command.symbol === 'confirm') {
+                return this.canRepairItem(this._item);
+            }
+            return true; 
+        }
+        
+
         makeCommandList() {
             this.addCommand("Sí", 'confirm');
             this.addCommand('No', 'cancel');
@@ -617,12 +612,14 @@ console.log("Durability System Plugin inicializado");
 
 
         canRepairItem(item) {
+            if (!item) return false; 
+        
             const repairCost = getRepairCost(item);
             const repairAmount = getItemDurability(item) - item.durability;
             const totalCost = repairCost * repairAmount;
             return $gameParty.gold() >= totalCost && repairAmount > 0;
         }
-
+        
 
         setItem(item) {
             this._item = item;
@@ -657,6 +654,8 @@ console.log("Durability System Plugin inicializado");
             super.refresh();
             this.drawBackground();
         }
+        
+        
 
         itemRect(index) {
             const rect = super.itemRect(index);
@@ -665,8 +664,33 @@ console.log("Durability System Plugin inicializado");
             rect.x = (this.contents.width - rect.width) / 2;
             return rect;
         }
-    }
 
+        updateCommandStatus() {
+            for (let i = 0; i < this._list.length; i++) {
+                const command = this._list[i];
+                if (command) {
+                    command.enabled = this.isCommandEnabled(i);
+                }
+            }
+        }
+
+
+        isOkEnabled() {
+            if (this.currentSymbol() === 'confirm' && !this.canRepairItem(this._item)) {
+                return false;
+            }
+            return true;
+        }
+    
+        processOk() {
+            if (this.isCurrentItemEnabled()) {
+                super.processOk();
+            } else {
+                this.playBuzzerSound();
+            }
+        }
+
+    }
 
 
     class Window_TotalRepairCost extends Window_Base {
