@@ -228,7 +228,20 @@
     const holdDuration = Number(parameters.holdDuration);
     const VIBRATION_STATE_SWITCH = Number(parameters.vibrationStateSwitchId);
     const DEFAULT_VIBRATION_STATE = parameters.defaultVibrationState === "ON" ? true : false;
-
+    
+    const _Scene_Map_start = Scene_Map.prototype.start;
+    Scene_Map.prototype.start = function() {
+        _Scene_Map_start.call(this); // Llamamos al método original para mantener su funcionalidad
+        $gameSwitches.setValue(VIBRATION_STATE_SWITCH, DEFAULT_VIBRATION_STATE); // Establecemos el interruptor con el estado predeterminado
+    
+        // Desactiva la vibración manualmente si DEFAULT_VIBRATION_STATE es false
+        if (!DEFAULT_VIBRATION_STATE) {
+            let gamepad = navigator.getGamepads()[0];
+            if (gamepad && gamepad.vibrationActuator) {
+                gamepad.vibrationActuator.reset(); // Desactiva la vibración
+            }
+        }
+    };
   
 
     
@@ -478,10 +491,6 @@
         }
     });
     
-    const _Scene_Map_start = Scene_Map.prototype.start;
-    Scene_Map.prototype.start = function() {
-        _Scene_Map_start.call(this); 
-        $gameSwitches.setValue(VIBRATION_STATE_SWITCH, DEFAULT_VIBRATION_STATE); 
-    };
+    
 
 })();
