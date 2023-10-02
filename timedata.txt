@@ -1,1 +1,0 @@
-[switch id, state, reference word, date arg1, date arg2]
