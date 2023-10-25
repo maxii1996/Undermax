@@ -1,6 +1,7 @@
 Local Switches:
-{1, 1, A, on}
-{1, 4, D, on}
+{1, 4, A, on}
+{2, 6, D, on}
+{3, 5, C, on}
 
 Switches:
 {1, on}
