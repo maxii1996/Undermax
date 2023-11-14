@@ -17,6 +17,5 @@
             { "type": "item", "id": 15, "amount": 3 },
             { "type": "weapon", "id": 10, "amount": 1 }
         ]
-    },
-
+    }
 ]
