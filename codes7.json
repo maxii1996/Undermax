@@ -1,30 +1,18 @@
 [
   {
-    "code": "H",
-    "startDate": "2023-11-14T00:00:00Z",
-    "endDate": "2023-11-30T00:00:00Z",
+    "code": "GIFT",
+    "startDate": "2023-11-15T17:18Z",
+    "endDate": "2023-12-30T00:00Z",
     "rewards": [
-      {
-        "type": "switch",
-        "id": 1,
-        "amount": true
-      },
       {
         "type": "item",
         "id": 7,
-        "amount": 1
-      }
-    ]
-  },
-  {
-    "code": "A",
-    "startDate": "2023-11-14T00:00:00Z",
-    "endDate": "2023-12-14T00:00:00Z",
-    "rewards": [
+        "amount": 15
+      },
       {
-        "type": "variable",
-        "id": 5,
-        "amount": 10
+        "type": "item",
+        "id": 9,
+        "amount": 7
       }
     ]
   }
