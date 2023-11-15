@@ -1,6 +1,6 @@
 [
   {
-    "code": "HAPPYDAY",
+    "code": "H",
     "startDate": "2023-11-14T00:00:00Z",
     "endDate": "2023-12-30T00:00:00Z",
     "rewards": [
@@ -24,6 +24,11 @@
       {
         "type": "armor",
         "id": 22,
+        "amount": 1
+      },
+      {
+        "type": "switch",
+        "id": 10,
         "amount": 1
       }
     ]
