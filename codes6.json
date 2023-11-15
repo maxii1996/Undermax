@@ -1,0 +1,31 @@
+[
+  {
+    "code": "HAPPYDAY",
+    "startDate": "2023-11-14T00:00:00Z",
+    "endDate": "2023-12-30T00:00:00Z",
+    "rewards": [
+      {
+        "type": "item",
+        "id": 7,
+        "amount": 1
+      },
+      {
+        "type": "weapon",
+        "id": 12,
+        "amount": 1
+      }
+    ]
+  },
+  {
+    "code": "ENDOFDAY",
+    "startDate": "2023-11-14T00:00:00Z",
+    "endDate": "2023-12-31T00:00:00Z",
+    "rewards": [
+      {
+        "type": "armor",
+        "id": 22,
+        "amount": 1
+      }
+    ]
+  }
+]
