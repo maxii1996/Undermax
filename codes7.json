@@ -2,34 +2,29 @@
   {
     "code": "H",
     "startDate": "2023-11-14T00:00:00Z",
-    "endDate": "2023-12-30T00:00:00Z",
+    "endDate": "2023-11-30T00:00:00Z",
     "rewards": [
+      {
+        "type": "switch",
+        "id": 1,
+        "amount": true
+      },
       {
         "type": "item",
         "id": 7,
-        "amount": 1
-      },
-      {
-        "type": "weapon",
-        "id": 12,
         "amount": 1
       }
     ]
   },
   {
-    "code": "ENDOFDAY",
+    "code": "A",
     "startDate": "2023-11-14T00:00:00Z",
-    "endDate": "2023-12-31T00:00:00Z",
+    "endDate": "2023-12-14T00:00:00Z",
     "rewards": [
       {
-        "type": "armor",
-        "id": 22,
-        "amount": 1
-      },
-      {
-        "type": "switch",
-        "id": 10,
-        "amount": 1
+        "type": "variable",
+        "id": 5,
+        "amount": 10
       }
     ]
   }
